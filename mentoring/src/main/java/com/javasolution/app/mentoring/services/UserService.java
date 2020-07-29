@@ -19,8 +19,11 @@ public class UserService implements UserDetailsService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private final UserRepository userRepository;
+    private final ConfirmationTokenService confirmationTokenService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       ConfirmationTokenService confirmationTokenService) {
+        this.confirmationTokenService = confirmationTokenService;
         this.userRepository = userRepository;
     }
 
@@ -34,6 +37,9 @@ public class UserService implements UserDetailsService {
         final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);
         user.setConfirmPassword("");
+
+        final ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         final User savedUser = userRepository.save(user);
 
