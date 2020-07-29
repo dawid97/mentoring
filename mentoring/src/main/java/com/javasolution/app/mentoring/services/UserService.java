@@ -57,6 +57,7 @@ public class UserService implements UserDetailsService {
 
         final ConfirmationToken confirmationToken = new ConfirmationToken(user);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
+        sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
 
         final User savedUser = userRepository.save(user);
 
