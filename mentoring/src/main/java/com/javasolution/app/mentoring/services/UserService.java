@@ -2,6 +2,7 @@ package com.javasolution.app.mentoring.services;
 
 import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
+import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -51,17 +52,22 @@ public class UserService implements UserDetailsService {
     }
 
     public User signUpUser(User user) {
-        final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
-        user.setPassword(encryptedPassword);
-        user.setConfirmPassword("");
 
-        final ConfirmationToken confirmationToken = new ConfirmationToken(user);
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
-        sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
+        try {
+            final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
+            user.setPassword(encryptedPassword);
+            user.setConfirmPassword("");
 
-        final User savedUser = userRepository.save(user);
+            final User savedUser = userRepository.save(user);
 
-        savedUser.setPassword("");
-        return savedUser;
+            final ConfirmationToken confirmationToken = new ConfirmationToken(user);
+            confirmationTokenService.saveConfirmationToken(confirmationToken);
+            sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
+
+            savedUser.setPassword("");
+            return savedUser;
+        } catch (Exception e) {
+            throw new UsernameAlreadyExistsException("Email '" + user.getEmail() + "' already exists");
+        }
     }
 }
