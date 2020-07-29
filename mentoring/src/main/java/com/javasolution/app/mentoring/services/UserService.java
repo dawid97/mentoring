@@ -4,6 +4,7 @@ import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,11 +21,27 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final ConfirmationTokenService confirmationTokenService;
+    private final EmailSenderService emailSenderService;
 
     public UserService(UserRepository userRepository,
-                       ConfirmationTokenService confirmationTokenService) {
+                       ConfirmationTokenService confirmationTokenService,
+                       EmailSenderService emailSenderService) {
         this.confirmationTokenService = confirmationTokenService;
         this.userRepository = userRepository;
+        this.emailSenderService = emailSenderService;
+    }
+
+    void sendConfirmationMail(String userMail, String token) {
+
+        final SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(userMail);
+        mailMessage.setSubject("Mail Confirmation Link!");
+        mailMessage.setFrom("<MAIL>");
+        mailMessage.setText(
+                "Thank you for registering. Please click on the below link to activate your account." + " http://localhost:8080/api/users/sign-up/confirm?token="
+                        + token);
+
+        emailSenderService.sendEmail(mailMessage);
     }
 
     @Override
