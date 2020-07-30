@@ -1,6 +1,8 @@
 package com.javasolution.app.mentoring.controllers;
 
+import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
+import com.javasolution.app.mentoring.services.ConfirmationTokenService;
 import com.javasolution.app.mentoring.services.MapValidationErrorService;
 import com.javasolution.app.mentoring.services.UserService;
 import com.javasolution.app.mentoring.validators.UserValidator;
@@ -11,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -18,8 +21,17 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final ConfirmationTokenService confirmationTokenService;
     private final UserValidator userValidator;
     private final MapValidationErrorService mapValidationErrorService;
+
+    @GetMapping("/sign-up/confirm")
+    ResponseEntity<?> confirmMail(@RequestParam("token") String token) {
+
+        final Optional<ConfirmationToken> optionalConfirmationToken = confirmationTokenService.findConfirmationTokenByToken(token);
+        optionalConfirmationToken.ifPresent(userService::confirmUser);
+        return new ResponseEntity<>("verified email", HttpStatus.OK);
+    }
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody User user, BindingResult result) {
