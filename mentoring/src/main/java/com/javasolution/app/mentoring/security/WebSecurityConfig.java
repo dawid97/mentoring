@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -34,6 +35,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         http.cors().and().csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and()
                 .authorizeRequests()
                 .antMatchers("/api/users/sign-in", "/api/users/sign-up/**").permitAll()
                 .anyRequest()
