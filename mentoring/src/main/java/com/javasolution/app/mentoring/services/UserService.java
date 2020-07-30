@@ -70,4 +70,14 @@ public class UserService implements UserDetailsService {
             throw new UsernameAlreadyExistsException("Email '" + user.getEmail() + "' already exists");
         }
     }
+
+    public void confirmUser(ConfirmationToken confirmationToken) {
+
+        final User user = confirmationToken.getUser();
+        user.setEnabled(true);
+
+        userRepository.save(user);
+
+        confirmationTokenService.deleteConfirmationToken(confirmationToken.getId());
+    }
 }
