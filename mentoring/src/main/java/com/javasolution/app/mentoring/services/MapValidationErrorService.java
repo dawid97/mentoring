@@ -12,13 +12,13 @@ import java.util.Map;
 @Service
 public class MapValidationErrorService {
 
-    public ResponseEntity<?> mapValidationService(BindingResult result){
+    public ResponseEntity<?> mapValidationService(BindingResult result) {
 
-        if(result.hasErrors()){
-            final Map<String,String> errorMap = new HashMap<>();
+        if (result.hasErrors()) {
+            final Map<String, String> errorMap = new HashMap<>();
 
-            for(FieldError error: result.getFieldErrors()){
-                errorMap.put(error.getField(),error.getDefaultMessage());
+            for (FieldError error : result.getFieldErrors()) {
+                errorMap.put(error.getField(), error.getDefaultMessage());
             }
 
             return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
