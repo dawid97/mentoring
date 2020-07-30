@@ -44,4 +44,8 @@ public class JwtUtil {
         Map<String,Object> claims = new HashMap<>();
         return createToken(claims,userDetails.getUsername());
     }
+
+    public String extractUsername(String token){
+        return extractClaim(token, Claims::getSubject);
+    }
 }
