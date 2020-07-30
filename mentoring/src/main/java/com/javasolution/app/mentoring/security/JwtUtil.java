@@ -40,12 +40,17 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
-    public String generateToken(UserDetails userDetails){
-        Map<String,Object> claims = new HashMap<>();
-        return createToken(claims,userDetails.getUsername());
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, userDetails.getUsername());
     }
 
-    public String extractUsername(String token){
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
