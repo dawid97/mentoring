@@ -1,12 +1,9 @@
 package com.javasolution.app.mentoring.services;
 
-import com.javasolution.app.mentoring.entities.ConfirmationToken;
-import com.javasolution.app.mentoring.entities.User;
-import com.javasolution.app.mentoring.entities.UserRole;
-import com.javasolution.app.mentoring.exceptions.DeleteAccountException;
-import com.javasolution.app.mentoring.exceptions.InvalidCastException;
-import com.javasolution.app.mentoring.exceptions.UnableSendEmailException;
-import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
+import com.javasolution.app.mentoring.entities.*;
+import com.javasolution.app.mentoring.exceptions.*;
+import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
+import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +30,19 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final ConfirmationTokenService confirmationTokenService;
     private final JavaMailSender javaMailSender;
+    private final MeetingRepository meetingRepository;
+    private final MeetingBookingRepository meetingBookingRepository;
 
     public UserService(UserRepository userRepository,
                        ConfirmationTokenService confirmationTokenService,
-                       JavaMailSender javaMailSender) {
+                       JavaMailSender javaMailSender,
+                       MeetingRepository meetingRepository,
+                       MeetingBookingRepository meetingBookingRepository) {
         this.confirmationTokenService = confirmationTokenService;
         this.userRepository = userRepository;
         this.javaMailSender = javaMailSender;
+        this.meetingRepository = meetingRepository;
+        this.meetingBookingRepository = meetingBookingRepository;
     }
 
     void sendConfirmationMail(String userMail, String token) throws MessagingException {
@@ -100,6 +103,31 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("User with email " + email + " cannot be found.");
         else
             return user;
+    }
+
+    public void deleteUser(String userId) {
+
+        final User student = findUser(userId);
+
+        if (student == null)
+            throw new UserNotFoundException("User with ID: '" + userId + "' not found");
+
+        if (student.getUserRole() == UserRole.MENTOR)
+            throw new DeleteAccountException("You can not delete account because this is mentor");
+
+        final List<MeetingBooking> meetingsBookings = meetingBookingRepository.findAllByStudent(student);
+
+        if (meetingsBookings != null) {
+
+            for (MeetingBooking meetingBooking : meetingsBookings) {
+                final Meeting meeting = meetingBooking.getMeeting();
+                meeting.setBooked(false);
+                meetingRepository.save(meeting);
+            }
+            meetingBookingRepository.deleteAll(meetingsBookings);
+        }
+
+        userRepository.delete(student);
     }
 
     public User signUpUser(User user) {
