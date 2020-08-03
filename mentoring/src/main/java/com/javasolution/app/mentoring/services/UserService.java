@@ -2,6 +2,7 @@ package com.javasolution.app.mentoring.services;
 
 import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
+import com.javasolution.app.mentoring.exceptions.UnableSendEmailException;
 import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,22 +72,32 @@ public class UserService implements UserDetailsService {
 
     public User signUpUser(User user) {
 
+        final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+        user.setConfirmPassword("");
+
+        final User savedUser;
+
         try {
-            final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
-            user.setPassword(encryptedPassword);
-            user.setConfirmPassword("");
-
-            final User savedUser = userRepository.save(user);
-
-            final ConfirmationToken confirmationToken = new ConfirmationToken(user);
-            confirmationTokenService.saveConfirmationToken(confirmationToken);
-            sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
-
-            savedUser.setPassword("");
-            return savedUser;
+            savedUser = userRepository.save(user);
         } catch (Exception e) {
             throw new UsernameAlreadyExistsException("Email '" + user.getEmail() + "' already exists");
         }
+
+        final ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        final ConfirmationToken savedConfirmationToken = confirmationTokenService.saveConfirmationToken(confirmationToken);
+
+        try {
+            sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
+        } catch (MessagingException ex) {
+            userRepository.delete(user);
+            confirmationTokenService.deleteConfirmationToken(savedConfirmationToken.getId());
+            throw new UnableSendEmailException("Something went wrong. Please try again later");
+        }
+
+        savedUser.setPassword("");
+
+        return savedUser;
     }
 
     public void confirmUser(ConfirmationToken confirmationToken) {
