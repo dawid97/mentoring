@@ -41,4 +41,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         final DeleteAccountResponse exceptionResponse = new DeleteAccountResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleMeetingBookingAlreadyExists(MeetingBookingAlreadyExistsException ex, WebRequest request) {
+        final MeetingBookingAlreadyExistsResponse exceptionResponse = new MeetingBookingAlreadyExistsResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
