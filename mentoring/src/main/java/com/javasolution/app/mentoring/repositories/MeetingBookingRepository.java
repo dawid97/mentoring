@@ -10,4 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface MeetingBookingRepository extends CrudRepository<MeetingBooking, Long> {
+
+    List<MeetingBooking> findAllByStudent(User student);
 }
