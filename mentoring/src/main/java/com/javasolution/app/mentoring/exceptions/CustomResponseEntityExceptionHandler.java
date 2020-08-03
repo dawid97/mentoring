@@ -1,5 +1,6 @@
 package com.javasolution.app.mentoring.exceptions;
 
+import com.javasolution.app.mentoring.responses.UnableSendEmailResponse;
 import com.javasolution.app.mentoring.responses.UsernameAlreadyExistsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,12 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
     @ExceptionHandler
     public final ResponseEntity<Object> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex, WebRequest request) {
         final UsernameAlreadyExistsResponse exceptionResponse = new UsernameAlreadyExistsResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleUnableSendEmail(UnableSendEmailException ex, WebRequest request) {
+        final UnableSendEmailResponse exceptionResponse = new UnableSendEmailResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }
