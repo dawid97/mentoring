@@ -2,6 +2,9 @@ package com.javasolution.app.mentoring.services;
 
 import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
+import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.DeleteAccountException;
+import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.UnableSendEmailException;
 import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -69,6 +74,21 @@ public class UserService implements UserDetailsService {
         user.setSurname(updateUserRequest.getSurname());
 
         return userRepository.save(user);
+    }
+
+    protected User findUser(String userId) {
+
+        final long id;
+
+        try {
+            id = Long.parseLong(userId);
+        } catch (NumberFormatException ex) {
+            throw new InvalidCastException("User id have to be long type");
+        }
+
+        final Optional<User> user = userRepository.findById(id);
+
+        return user.orElse(null);
     }
 
     @Override
