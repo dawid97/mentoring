@@ -5,14 +5,16 @@ import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -22,27 +24,38 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final ConfirmationTokenService confirmationTokenService;
-    private final EmailSenderService emailSenderService;
+    private final JavaMailSender javaMailSender;
 
     public UserService(UserRepository userRepository,
                        ConfirmationTokenService confirmationTokenService,
-                       EmailSenderService emailSenderService) {
+                       JavaMailSender javaMailSender) {
         this.confirmationTokenService = confirmationTokenService;
         this.userRepository = userRepository;
-        this.emailSenderService = emailSenderService;
+        this.javaMailSender = javaMailSender;
     }
 
-    void sendConfirmationMail(String userMail, String token) {
+    void sendConfirmationMail(String userMail, String token) throws MessagingException {
 
-        final SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(userMail);
-        mailMessage.setSubject("Mail Confirmation Link!");
-        mailMessage.setFrom("<MAIL>");
-        mailMessage.setText(
-                "Thank you for registering. Please click on the below link to activate your account." + " http://localhost:8080/api/users/sign-up/confirm?token="
-                        + token);
+        final MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        final MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setTo(userMail);
+        mimeMessageHelper.setSubject("Mail Confirmation Link!");
 
-        emailSenderService.sendEmail(mailMessage);
+        String message = "<head>" +
+                "<style type=\"text/css\">" +
+                ".red { color: #f00; }" +
+                "</style>" +
+                "</head>" +
+                "<h1 class=\"red\">Thank you for registering! \uD83D\uDE00</h1>" +
+                "<p>" +
+                "Please click on the below link to activate your account." +
+                "</p>" +
+                "<div>" +
+                "http://localhost:8080/api/users/sign-up/confirm?token=" + token +
+                "</div>";
+
+        mimeMessage.setContent(message, "text/html; charset=utf-8");
+        javaMailSender.send(mimeMessage);
     }
 
     @Override
