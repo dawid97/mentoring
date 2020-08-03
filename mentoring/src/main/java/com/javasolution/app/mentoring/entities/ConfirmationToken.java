@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
+@Entity(name = "ConfirmationTokens")
 @NoArgsConstructor
 @Getter
 @Setter
