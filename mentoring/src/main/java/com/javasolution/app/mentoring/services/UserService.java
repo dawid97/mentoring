@@ -5,6 +5,7 @@ import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.exceptions.UnableSendEmailException;
 import com.javasolution.app.mentoring.exceptions.UsernameAlreadyExistsException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
+import com.javasolution.app.mentoring.requests.UpdateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.security.Principal;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -57,6 +59,16 @@ public class UserService implements UserDetailsService {
 
         mimeMessage.setContent(message, "text/html; charset=utf-8");
         javaMailSender.send(mimeMessage);
+    }
+
+    public User updateMe(UpdateUserRequest updateUserRequest, Principal principal) {
+
+        final User user = userRepository.findByEmail(principal.getName());
+
+        user.setName(updateUserRequest.getName());
+        user.setSurname(updateUserRequest.getSurname());
+
+        return userRepository.save(user);
     }
 
     @Override
