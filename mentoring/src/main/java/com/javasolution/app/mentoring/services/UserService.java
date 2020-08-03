@@ -130,6 +130,20 @@ public class UserService implements UserDetailsService {
         userRepository.delete(student);
     }
 
+    public void deleteAccount(Principal principal) {
+
+        final User student = userRepository.findByEmail(principal.getName());
+        if (student.getUserRole() == UserRole.MENTOR)
+            throw new DeleteAccountException("You can not delete account because you are mentor");
+
+        final Optional<MeetingBooking> meetingBooking = meetingBookingRepository.findByStudent(student);
+
+        if (meetingBooking.isPresent())
+            throw new MeetingBookingAlreadyExistsException("You can not delete account because you have bookings");
+
+        userRepository.delete(student);
+    }
+
     public User signUpUser(User user) {
 
         final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
