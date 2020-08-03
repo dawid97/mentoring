@@ -1,5 +1,6 @@
 package com.javasolution.app.mentoring.exceptions;
 
+import com.javasolution.app.mentoring.responses.InvalidCastResponse;
 import com.javasolution.app.mentoring.responses.UnableSendEmailResponse;
 import com.javasolution.app.mentoring.responses.UsernameAlreadyExistsResponse;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,12 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
     @ExceptionHandler
     public final ResponseEntity<Object> handleUnableSendEmail(UnableSendEmailException ex, WebRequest request) {
         final UnableSendEmailResponse exceptionResponse = new UnableSendEmailResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleInvalidCast(InvalidCastException ex, WebRequest request) {
+        final InvalidCastResponse exceptionResponse = new InvalidCastResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }
