@@ -1,9 +1,6 @@
 package com.javasolution.app.mentoring.exceptions;
 
-import com.javasolution.app.mentoring.responses.InvalidCastResponse;
-import com.javasolution.app.mentoring.responses.UnableSendEmailResponse;
-import com.javasolution.app.mentoring.responses.UserNotFoundResponse;
-import com.javasolution.app.mentoring.responses.UsernameAlreadyExistsResponse;
+import com.javasolution.app.mentoring.responses.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,6 +33,12 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
     @ExceptionHandler
     public final ResponseEntity<Object> handleUserNotFound(UserNotFoundException ex, WebRequest request) {
         final UserNotFoundResponse exceptionResponse = new UserNotFoundResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleDeleteAccount(DeleteAccountException ex, WebRequest request) {
+        final DeleteAccountResponse exceptionResponse = new DeleteAccountResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }
