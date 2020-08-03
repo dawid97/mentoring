@@ -4,6 +4,7 @@ import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.requests.LoginRequest;
 import com.javasolution.app.mentoring.requests.UpdateUserRequest;
+import com.javasolution.app.mentoring.responses.DeleteAccountResponse;
 import com.javasolution.app.mentoring.responses.LoginResponse;
 import com.javasolution.app.mentoring.security.JwtUtil;
 import com.javasolution.app.mentoring.services.ConfirmationTokenService;
