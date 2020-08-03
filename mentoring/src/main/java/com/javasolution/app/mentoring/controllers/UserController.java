@@ -3,6 +3,7 @@ package com.javasolution.app.mentoring.controllers;
 import com.javasolution.app.mentoring.entities.ConfirmationToken;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.requests.LoginRequest;
+import com.javasolution.app.mentoring.requests.UpdateUserRequest;
 import com.javasolution.app.mentoring.responses.LoginResponse;
 import com.javasolution.app.mentoring.security.JwtUtil;
 import com.javasolution.app.mentoring.services.ConfirmationTokenService;
@@ -19,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.Optional;
 
 @RestController
@@ -32,6 +34,19 @@ public class UserController {
     private final MapValidationErrorService mapValidationErrorService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMe(@Valid @RequestBody UpdateUserRequest updateUserRequest,
+                                      BindingResult result,
+                                      Principal principal) {
+
+        final ResponseEntity<?> errorMap = mapValidationErrorService.mapValidationService(result);
+        if (errorMap != null) return errorMap;
+
+        final User user = userService.updateMe(updateUserRequest, principal);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) throws Exception {
