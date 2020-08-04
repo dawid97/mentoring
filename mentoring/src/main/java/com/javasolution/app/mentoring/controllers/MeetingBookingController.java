@@ -1,12 +1,28 @@
 package com.javasolution.app.mentoring.controllers;
 
+import com.javasolution.app.mentoring.entities.MeetingBooking;
+import com.javasolution.app.mentoring.services.MeetingBookingService;
 import lombok.AllArgsConstructor;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api")
 public class MeetingBookingController {
+
+    private final MeetingBookingService meetingBookingService;
+
+    @PostMapping("/meetings/{meetingId}/bookings")
+    public ResponseEntity<?> bookingMeeting(@PathVariable String meetingId, Principal principal) {
+
+        final MeetingBooking meetingBooking = meetingBookingService.bookingMeeting(meetingId, principal);
+
+        return new ResponseEntity<>(meetingBooking, HttpStatus.OK);
+    }
 }
