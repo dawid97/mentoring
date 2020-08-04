@@ -61,4 +61,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         final MeetingsAlreadyExistResponse exceptionResponse = new MeetingsAlreadyExistResponse(ex.getMessage(), Collections.singletonList(ex.getCollisionMeetings()));
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleMeetingNotFound(MeetingNotFoundException ex, WebRequest request) {
+        final MeetingNotFoundResponse exceptionResponse = new MeetingNotFoundResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
