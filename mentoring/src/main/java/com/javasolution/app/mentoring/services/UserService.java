@@ -187,4 +187,8 @@ public class UserService implements UserDetailsService {
 
         confirmationTokenService.deleteConfirmationToken(confirmationToken.getId());
     }
+
+    public Iterable<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }
