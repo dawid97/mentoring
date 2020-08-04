@@ -35,4 +35,12 @@ public class MeetingBookingController {
         return new ResponseEntity<>(new CancelBookingResponse("Meeting booking with ID: '" + bookingId + "' was deleted"),
                 HttpStatus.OK);
     }
+
+    @GetMapping("/bookings")
+    public ResponseEntity<?> getAllBookings() {
+
+        final Iterable<MeetingBooking> meetingsBookings = meetingBookingService.getAllBookings();
+
+        return new ResponseEntity<>(meetingsBookings, HttpStatus.OK);
+    }
 }
