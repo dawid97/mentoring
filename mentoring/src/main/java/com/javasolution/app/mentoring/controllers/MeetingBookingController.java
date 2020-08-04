@@ -1,6 +1,7 @@
 package com.javasolution.app.mentoring.controllers;
 
 import com.javasolution.app.mentoring.entities.MeetingBooking;
+import com.javasolution.app.mentoring.responses.CancelBookingResponse;
 import com.javasolution.app.mentoring.services.MeetingBookingService;
 import lombok.AllArgsConstructor;
 
@@ -24,5 +25,14 @@ public class MeetingBookingController {
         final MeetingBooking meetingBooking = meetingBookingService.bookingMeeting(meetingId, principal);
 
         return new ResponseEntity<>(meetingBooking, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/bookings/{bookingId}")
+    public ResponseEntity<?> cancelBooking(@PathVariable String bookingId, Principal principal) {
+
+        meetingBookingService.cancelBooking(bookingId, principal);
+
+        return new ResponseEntity<>(new CancelBookingResponse("Meeting booking with ID: '" + bookingId + "' was deleted"),
+                HttpStatus.OK);
     }
 }
