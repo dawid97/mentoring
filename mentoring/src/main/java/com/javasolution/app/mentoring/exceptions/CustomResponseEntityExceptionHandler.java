@@ -73,4 +73,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         final MeetingBookedResponse exceptionResponse = new MeetingBookedResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleMeetingTime(MeetingTimeException ex, WebRequest request) {
+        final MeetingTimeResponse exceptionResponse = new MeetingTimeResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
