@@ -4,6 +4,7 @@ package com.javasolution.app.mentoring.services;
 import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.MeetingsAlreadyExistException;
 import com.javasolution.app.mentoring.exceptions.MentorNotFoundException;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -78,5 +80,20 @@ public class MeetingService {
             meetingRepository.save(meetingToSave);
 
         return meetings;
+    }
+
+    protected Meeting findMeeting(String meetingId) {
+
+        final long id;
+
+        try {
+            id = Long.parseLong(meetingId);
+        } catch (NumberFormatException ex) {
+            throw new InvalidCastException("Meeting id have to be long type");
+        }
+
+        final Optional<Meeting> meeting = meetingRepository.findById(id);
+
+        return meeting.orElse(null);
     }
 }
