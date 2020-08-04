@@ -144,6 +144,10 @@ public class UserService implements UserDetailsService {
         userRepository.delete(student);
     }
 
+    public User getMe(Principal principal) {
+        return userRepository.findByEmail(principal.getName());
+    }
+
     public User signUpUser(User user) {
 
         final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
