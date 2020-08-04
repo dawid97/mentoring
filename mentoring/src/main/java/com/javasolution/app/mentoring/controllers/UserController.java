@@ -65,6 +65,14 @@ public class UserController {
         return new ResponseEntity<>(new DeleteAccountResponse("Account deleted successfully"), HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe(Principal principal) {
+
+        final User user = userService.getMe(principal);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) throws Exception {
 
