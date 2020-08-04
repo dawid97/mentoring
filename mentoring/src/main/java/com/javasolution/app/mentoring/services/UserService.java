@@ -191,4 +191,14 @@ public class UserService implements UserDetailsService {
     public Iterable<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    public User getUser(String userId) {
+
+        final User user = findUser(userId);
+
+        if (user == null)
+            throw new UserNotFoundException("User with ID: '" + userId + "' was not found");
+
+        return user;
+    }
 }
