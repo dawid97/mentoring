@@ -119,4 +119,46 @@ public class MeetingBookingService {
 
         return meetingBooking.orElse(null);
     }
+
+    public void cancelBooking(String bookingId, Principal principal) {
+
+        //check if meeting booking exists
+        final MeetingBooking meetingBooking = findMeetingBooking(bookingId);
+        if (meetingBooking == null)
+            throw new MeetingBookingNotFoundException("Meeting booking with ID: '" + bookingId + "' was not found");
+
+        final User student = userRepository.findByEmail(principal.getName());
+
+        //check if owner
+        if (!meetingBooking.getStudent().getId().equals(student.getId()))
+            throw new NotOwnerException("You are not owner the meeting booking");
+
+        //check if mentor exists
+        final User mentor = userRepository.findByUserRole(UserRole.MENTOR);
+        if (mentor == null) throw new MentorNotFoundException("Mentor can not be found");
+
+        final Meeting meeting = meetingBooking.getMeeting();
+        meeting.setBooked(false);
+
+        try {
+
+            //send email to student
+            sendInfoAboutBookedMeeting(principal.getName(),
+                    meeting,
+                    "You have successfully canceled the meeting!",
+                    "Cancellation of the meeting!");
+
+            //send email to mentor
+            sendInfoAboutBookedMeeting(mentor.getEmail(),
+                    meeting,
+                    "Student: " + principal.getName() + " canceled the meeting!",
+                    "Cancellation of the meeting!");
+
+        } catch (MessagingException ex) {
+            throw new UnableSendEmailException("Something went wrong. Please try again later");
+        }
+
+        meetingRepository.save(meeting);
+        meetingBookingRepository.delete(meetingBooking);
+    }
 }
