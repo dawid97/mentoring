@@ -4,10 +4,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
-import com.javasolution.app.mentoring.exceptions.MeetingBookingAlreadyExistsException;
-import com.javasolution.app.mentoring.exceptions.MeetingNotFoundException;
-import com.javasolution.app.mentoring.exceptions.MentorNotFoundException;
-import com.javasolution.app.mentoring.exceptions.UnableSendEmailException;
+import com.javasolution.app.mentoring.exceptions.*;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -106,5 +103,20 @@ public class MeetingBookingService {
 
         meetingRepository.save(meeting);
         return meetingBookingRepository.save(meetingBooking);
+    }
+
+    protected MeetingBooking findMeetingBooking(String bookingId) {
+
+        final long id;
+
+        try {
+            id = Long.parseLong(bookingId);
+        } catch (NumberFormatException ex) {
+            throw new InvalidCastException("Meeting booking id have to be long type");
+        }
+
+        Optional<MeetingBooking> meetingBooking = meetingBookingRepository.findById(id);
+
+        return meetingBooking.orElse(null);
     }
 }
