@@ -65,4 +65,12 @@ public class MeetingController {
 
         return new ResponseEntity<>(meetings, HttpStatus.OK);
     }
+
+    @GetMapping("/{meetingId}")
+    public ResponseEntity<?> getMeeting(@PathVariable String meetingId) {
+
+        final Meeting meeting = meetingService.getMeeting(meetingId);
+
+        return new ResponseEntity<>(meeting, HttpStatus.OK);
+    }
 }
