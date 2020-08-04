@@ -130,9 +130,9 @@ public class MeetingService {
 
         final long seconds = timeBetweenStartMeetingAndEnd.getSeconds();
 
-        final int meetingsNumber = (int) seconds /900;
+        final int meetingsNumber = (int) seconds / 900;
 
-        if(meetingsNumber != 1)
+        if (meetingsNumber != 1)
             throw new MeetingTimeException("Time between meetingStartTime and meetingEndTime have to be 15 minutes");
 
         //check collisions
@@ -143,5 +143,9 @@ public class MeetingService {
             throw new MeetingsAlreadyExistException("Meetings already exist", collisionMeetings);
 
         return meetingRepository.save(meeting);
+    }
+
+    public Iterable<Meeting> getAllMeetings() {
+        return meetingRepository.findAll();
     }
 }
