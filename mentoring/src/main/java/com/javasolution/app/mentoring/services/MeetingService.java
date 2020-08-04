@@ -148,4 +148,14 @@ public class MeetingService {
     public Iterable<Meeting> getAllMeetings() {
         return meetingRepository.findAll();
     }
+
+    public Meeting getMeeting(String meetingId) {
+
+        final Meeting meeting = findMeeting(meetingId);
+
+        if (meeting == null)
+            throw new MeetingNotFoundException("Meeting with ID: '" + meetingId + "' was not found");
+
+        return meeting;
+    }
 }
