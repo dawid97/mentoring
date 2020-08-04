@@ -165,4 +165,14 @@ public class MeetingBookingService {
     public Iterable<MeetingBooking> getAllBookings() {
         return meetingBookingRepository.findAll();
     }
+
+    public MeetingBooking getBooking(String bookingId) {
+
+        final MeetingBooking meetingBooking = findMeetingBooking(bookingId);
+
+        if (meetingBooking == null)
+            throw new MeetingBookingNotFoundException("Meeting booking with ID: '" + bookingId + "' was not found");
+
+        return meetingBooking;
+    }
 }
