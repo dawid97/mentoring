@@ -4,9 +4,7 @@ package com.javasolution.app.mentoring.services;
 import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
-import com.javasolution.app.mentoring.exceptions.InvalidCastException;
-import com.javasolution.app.mentoring.exceptions.MeetingsAlreadyExistException;
-import com.javasolution.app.mentoring.exceptions.MentorNotFoundException;
+import com.javasolution.app.mentoring.exceptions.*;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import lombok.AllArgsConstructor;
@@ -95,5 +93,18 @@ public class MeetingService {
         final Optional<Meeting> meeting = meetingRepository.findById(id);
 
         return meeting.orElse(null);
+    }
+
+    public void deleteMeeting(String meetingId) {
+
+        final Meeting databaseMeeting = findMeeting(meetingId);
+
+        if (databaseMeeting == null)
+            throw new MeetingNotFoundException("Meeting with ID: '" + meetingId + "' was not found");
+
+        if (databaseMeeting.getBooked())
+            throw new MeetingBookedException("You can not delete meeting with ID: '" + meetingId + "' because someone booked the meeting");
+
+        meetingRepository.deleteById(Long.parseLong(meetingId));
     }
 }
