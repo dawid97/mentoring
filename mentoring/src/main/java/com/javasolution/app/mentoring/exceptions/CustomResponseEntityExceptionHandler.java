@@ -85,4 +85,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         final MeetingBookingNotFoundResponse exceptionResponse = new MeetingBookingNotFoundResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleNotOwner(NotOwnerException ex, WebRequest request) {
+        final NotOwnerResponse exceptionResponse = new NotOwnerResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
