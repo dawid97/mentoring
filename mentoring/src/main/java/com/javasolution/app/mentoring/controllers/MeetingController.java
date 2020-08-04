@@ -44,4 +44,17 @@ public class MeetingController {
         return new ResponseEntity<>(new DeleteMeetingResponse("Meeting with ID: '" + meetingId + "' was deleted"),
                 HttpStatus.OK);
     }
+
+    @PutMapping("/{meetingId}")
+    public ResponseEntity<?> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting, BindingResult result) {
+
+        meetingValidator.validate(meeting, result);
+
+        final ResponseEntity<?> errorMap = mapValidationErrorService.mapValidationService(result);
+        if (errorMap != null) return errorMap;
+
+        final Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
+
+        return new ResponseEntity<>(updatedMeeting, HttpStatus.OK);
+    }
 }
