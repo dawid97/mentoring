@@ -107,4 +107,41 @@ public class MeetingService {
 
         meetingRepository.deleteById(Long.parseLong(meetingId));
     }
+
+    public Meeting updateMeeting(String meetingId, Meeting meeting) {
+
+        final Meeting databaseMeeting = findMeeting(meetingId);
+
+        if (databaseMeeting == null)
+            throw new MeetingNotFoundException("Meeting with ID: '" + meetingId + "' was not found");
+
+        if (databaseMeeting.getBooked())
+            throw new MeetingBookedException("You can not update meeting with ID: '" + meetingId + "' because someone booked the meeting");
+
+        meeting.setId(databaseMeeting.getId());
+        meeting.setMentor(databaseMeeting.getMentor());
+        meeting.setCreateAt(databaseMeeting.getCreateAt());
+        meeting.setBooked(databaseMeeting.getBooked());
+
+        final Duration timeBetweenStartMeetingAndEnd = Duration.between(
+                meeting.getMeetingStartTime(),
+                meeting.getMeetingEndTime()
+        );
+
+        final long seconds = timeBetweenStartMeetingAndEnd.getSeconds();
+
+        final int meetingsNumber = (int) seconds /900;
+
+        if(meetingsNumber != 1)
+            throw new MeetingTimeException("Time between meetingStartTime and meetingEndTime have to be 15 minutes");
+
+        //check collisions
+        final List<Meeting> collisionMeetings = checkCollision((List<Meeting>) meetingRepository.findAll(), List.of(meeting));
+
+        //there are collisions
+        if (!collisionMeetings.isEmpty())
+            throw new MeetingsAlreadyExistException("Meetings already exist", collisionMeetings);
+
+        return meetingRepository.save(meeting);
+    }
 }
