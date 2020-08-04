@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Collections;
+
 @ControllerAdvice
 //@RestController
 public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
@@ -51,6 +53,12 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
     @ExceptionHandler
     public final ResponseEntity<Object> handleMentorNotFound(MentorNotFoundException ex, WebRequest request) {
         final MentorNotFoundResponse exceptionResponse = new MentorNotFoundResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleMeetingsAlreadyExist(MeetingsAlreadyExistException ex, WebRequest request) {
+        final MeetingsAlreadyExistResponse exceptionResponse = new MeetingsAlreadyExistResponse(ex.getMessage(), Collections.singletonList(ex.getCollisionMeetings()));
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }
