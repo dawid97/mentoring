@@ -111,4 +111,12 @@ public class UserController {
         final User newUser = userService.signUpUser(user);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllUsers() {
+
+        final Iterable<User> users = userService.getAllUsers();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
 }
