@@ -119,4 +119,12 @@ public class UserController {
 
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUser(@PathVariable String userId) {
+
+        final User user = userService.getUser(userId);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }
