@@ -1,6 +1,7 @@
 package com.javasolution.app.mentoring.controllers;
 
 import com.javasolution.app.mentoring.entities.Meeting;
+import com.javasolution.app.mentoring.responses.DeleteMeetingResponse;
 import com.javasolution.app.mentoring.services.MapValidationErrorService;
 import com.javasolution.app.mentoring.services.MeetingService;
 import com.javasolution.app.mentoring.validators.MeetingValidator;
@@ -33,5 +34,14 @@ public class MeetingController {
         final List<Meeting> meetings = meetingService.addMeeting(meeting);
 
         return new ResponseEntity<>(meetings, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{meetingId}")
+    public ResponseEntity<?> deleteMeeting(@PathVariable String meetingId) {
+
+        meetingService.deleteMeeting(meetingId);
+
+        return new ResponseEntity<>(new DeleteMeetingResponse("Meeting with ID: '" + meetingId + "' was deleted"),
+                HttpStatus.OK);
     }
 }
