@@ -161,4 +161,8 @@ public class MeetingBookingService {
         meetingRepository.save(meeting);
         meetingBookingRepository.delete(meetingBooking);
     }
+
+    public Iterable<MeetingBooking> getAllBookings() {
+        return meetingBookingRepository.findAll();
+    }
 }
