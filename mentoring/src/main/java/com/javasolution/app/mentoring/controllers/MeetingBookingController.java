@@ -43,4 +43,12 @@ public class MeetingBookingController {
 
         return new ResponseEntity<>(meetingsBookings, HttpStatus.OK);
     }
+
+    @GetMapping("/bookings/{bookingId}")
+    public ResponseEntity<?> getBooking(@PathVariable String bookingId) {
+
+        final MeetingBooking meetingBooking = meetingBookingService.getBooking(bookingId);
+
+        return new ResponseEntity<>(meetingBooking, HttpStatus.OK);
+    }
 }
