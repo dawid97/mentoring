@@ -47,4 +47,10 @@ public class CustomResponseEntityExceptionHandler extends ResponseEntityExceptio
         final MeetingBookingAlreadyExistsResponse exceptionResponse = new MeetingBookingAlreadyExistsResponse(ex.getMessage());
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleMentorNotFound(MentorNotFoundException ex, WebRequest request) {
+        final MentorNotFoundResponse exceptionResponse = new MentorNotFoundResponse(ex.getMessage());
+        return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }
