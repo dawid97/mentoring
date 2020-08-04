@@ -57,4 +57,12 @@ public class MeetingController {
 
         return new ResponseEntity<>(updatedMeeting, HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllMeetings() {
+
+        final Iterable<Meeting> meetings = meetingService.getAllMeetings();
+
+        return new ResponseEntity<>(meetings, HttpStatus.OK);
+    }
 }
