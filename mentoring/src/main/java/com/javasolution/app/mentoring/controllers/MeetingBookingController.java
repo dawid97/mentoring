@@ -59,4 +59,12 @@ public class MeetingBookingController {
 
         return new ResponseEntity<>(meetingBooking, HttpStatus.OK);
     }
+
+    @GetMapping("/bookings/me")
+    public ResponseEntity<?> getAllMyBookings(Principal principal) {
+
+        final Iterable<MeetingBooking> meetingsBookings = meetingBookingService.getAllMyBookings(principal);
+
+        return new ResponseEntity<>(meetingsBookings, HttpStatus.OK);
+    }
 }
