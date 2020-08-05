@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -172,6 +173,19 @@ public class MeetingBookingService {
 
         if (meetingBooking == null)
             throw new MeetingBookingNotFoundException("Meeting booking with ID: '" + bookingId + "' was not found");
+
+        return meetingBooking;
+    }
+
+    public MeetingBooking getMyBooking(String bookingId, Principal principal) {
+
+        MeetingBooking meetingBooking = findMeetingBooking(bookingId);
+
+        if (meetingBooking == null)
+            throw new MeetingBookingNotFoundException("Meeting booking with ID: '" + bookingId + "' was not found");
+
+        if (!meetingBooking.getStudent().getEmail().equals(principal.getName()))
+            throw new NotOwnerException("You are not owner the meeting booking");
 
         return meetingBooking;
     }
