@@ -24,7 +24,7 @@ public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
 
-    private List<Meeting> checkCollision(List<Meeting> databaseMeetings, List<Meeting> meetings) {
+    private List<Meeting> checkCollision(final List<Meeting> databaseMeetings, final List<Meeting> meetings) {
         final List<Meeting> collisionMeetings = new ArrayList<>();
 
         for (Meeting meeting : meetings) {
@@ -41,7 +41,7 @@ public class MeetingService {
         return collisionMeetings;
     }
 
-    public List<Meeting> addMeeting(Meeting meeting) {
+    public List<Meeting> addMeeting(final Meeting meeting) {
 
         final Duration timeBetweenStartMeetingAndEnd = Duration.between(
                 meeting.getMeetingStartTime(),
@@ -80,7 +80,7 @@ public class MeetingService {
         return meetings;
     }
 
-    protected Meeting findMeeting(String meetingId) {
+    protected Meeting findMeeting(final String meetingId) {
 
         final long id;
 
@@ -95,7 +95,7 @@ public class MeetingService {
         return meeting.orElse(null);
     }
 
-    public void deleteMeeting(String meetingId) {
+    public void deleteMeeting(final String meetingId) {
 
         final Meeting databaseMeeting = findMeeting(meetingId);
 
@@ -108,7 +108,7 @@ public class MeetingService {
         meetingRepository.deleteById(Long.parseLong(meetingId));
     }
 
-    public Meeting updateMeeting(String meetingId, Meeting meeting) {
+    public Meeting updateMeeting(final String meetingId, final Meeting meeting) {
 
         final Meeting databaseMeeting = findMeeting(meetingId);
 
@@ -149,7 +149,7 @@ public class MeetingService {
         return meetingRepository.findAll();
     }
 
-    public Meeting getMeeting(String meetingId) {
+    public Meeting getMeeting(final String meetingId) {
 
         final Meeting meeting = findMeeting(meetingId);
 

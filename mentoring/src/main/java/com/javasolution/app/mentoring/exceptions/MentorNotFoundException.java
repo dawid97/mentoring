@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class MentorNotFoundException extends RuntimeException {
 
-    public MentorNotFoundException(String message) {
+    public MentorNotFoundException(final String message) {
         super(message);
     }
 }

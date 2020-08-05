@@ -33,11 +33,11 @@ public class UserService implements UserDetailsService {
     private final MeetingRepository meetingRepository;
     private final MeetingBookingRepository meetingBookingRepository;
 
-    public UserService(UserRepository userRepository,
-                       ConfirmationTokenService confirmationTokenService,
-                       JavaMailSender javaMailSender,
-                       MeetingRepository meetingRepository,
-                       MeetingBookingRepository meetingBookingRepository) {
+    public UserService(final UserRepository userRepository,
+                       final ConfirmationTokenService confirmationTokenService,
+                       final JavaMailSender javaMailSender,
+                       final MeetingRepository meetingRepository,
+                       final MeetingBookingRepository meetingBookingRepository) {
         this.confirmationTokenService = confirmationTokenService;
         this.userRepository = userRepository;
         this.javaMailSender = javaMailSender;
@@ -45,14 +45,14 @@ public class UserService implements UserDetailsService {
         this.meetingBookingRepository = meetingBookingRepository;
     }
 
-    void sendConfirmationMail(String userMail, String token) throws MessagingException {
+    void sendConfirmationMail(final String userMail, final String token) throws MessagingException {
 
         final MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         final MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
         mimeMessageHelper.setTo(userMail);
         mimeMessageHelper.setSubject("Mail Confirmation Link!");
 
-        String message = "<head>" +
+        final String message = "<head>" +
                 "<style type=\"text/css\">" +
                 ".red { color: #f00; }" +
                 "</style>" +
@@ -69,7 +69,7 @@ public class UserService implements UserDetailsService {
         javaMailSender.send(mimeMessage);
     }
 
-    public User updateMe(UpdateUserRequest updateUserRequest, Principal principal) {
+    public User updateMe(final UpdateUserRequest updateUserRequest, final Principal principal) {
 
         final User user = userRepository.findByEmail(principal.getName());
 
@@ -79,13 +79,13 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    protected User findUser(String userId) {
+    protected User findUser(final String userId) {
 
         final long id;
 
         try {
             id = Long.parseLong(userId);
-        } catch (NumberFormatException ex) {
+        } catch (final NumberFormatException ex) {
             throw new InvalidCastException("User id have to be long type");
         }
 
@@ -95,7 +95,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
 
         final User user = userRepository.findByEmail(email);
 
@@ -105,7 +105,7 @@ public class UserService implements UserDetailsService {
             return user;
     }
 
-    public void deleteUser(String userId) {
+    public void deleteUser(final String userId) {
 
         final User student = findUser(userId);
 
@@ -130,7 +130,7 @@ public class UserService implements UserDetailsService {
         userRepository.delete(student);
     }
 
-    public void deleteAccount(Principal principal) {
+    public void deleteAccount(final Principal principal) {
 
         final User student = userRepository.findByEmail(principal.getName());
         if (student.getUserRole() == UserRole.MENTOR)
@@ -144,11 +144,11 @@ public class UserService implements UserDetailsService {
         userRepository.delete(student);
     }
 
-    public User getMe(Principal principal) {
+    public User getMe(final Principal principal) {
         return userRepository.findByEmail(principal.getName());
     }
 
-    public User signUpUser(User user) {
+    public User signUpUser(final User user) {
 
         final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);
@@ -158,7 +158,7 @@ public class UserService implements UserDetailsService {
 
         try {
             savedUser = userRepository.save(user);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new UsernameAlreadyExistsException("Email '" + user.getEmail() + "' already exists");
         }
 
@@ -167,7 +167,7 @@ public class UserService implements UserDetailsService {
 
         try {
             sendConfirmationMail(user.getEmail(), confirmationToken.getConfirmationToken());
-        } catch (MessagingException ex) {
+        } catch (final MessagingException ex) {
             userRepository.delete(user);
             confirmationTokenService.deleteConfirmationToken(savedConfirmationToken.getId());
             throw new UnableSendEmailException("Something went wrong. Please try again later");
@@ -178,7 +178,7 @@ public class UserService implements UserDetailsService {
         return savedUser;
     }
 
-    public void confirmUser(ConfirmationToken confirmationToken) {
+    public void confirmUser(final ConfirmationToken confirmationToken) {
 
         final User user = confirmationToken.getUser();
         user.setEnabled(true);
@@ -192,7 +192,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public User getUser(String userId) {
+    public User getUser(final String userId) {
 
         final User user = findUser(userId);
 

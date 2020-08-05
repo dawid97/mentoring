@@ -14,15 +14,15 @@ public class ConfirmationTokenService {
 
     private final ConfirmationTokenRepository confirmationTokenRepository;
 
-    public ConfirmationToken saveConfirmationToken(ConfirmationToken confirmationToken) {
+    public ConfirmationToken saveConfirmationToken(final ConfirmationToken confirmationToken) {
         return confirmationTokenRepository.save(confirmationToken);
     }
 
-    public Optional<ConfirmationToken> findConfirmationTokenByToken(String token) {
+    public Optional<ConfirmationToken> findConfirmationTokenByToken(final String token) {
         return confirmationTokenRepository.findConfirmationTokenByConfirmationToken(token);
     }
 
-    public void deleteConfirmationToken(Long id) {
+    public void deleteConfirmationToken(final Long id) {
         confirmationTokenRepository.deleteById(id);
     }
 }

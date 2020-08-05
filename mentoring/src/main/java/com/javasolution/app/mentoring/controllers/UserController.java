@@ -37,9 +37,9 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     @PutMapping("/me")
-    public ResponseEntity<?> updateMe(@Valid @RequestBody UpdateUserRequest updateUserRequest,
-                                      BindingResult result,
-                                      Principal principal) {
+    public ResponseEntity<?> updateMe(@Valid @RequestBody final UpdateUserRequest updateUserRequest,
+                                      final BindingResult result,
+                                      final Principal principal) {
 
         final ResponseEntity<?> errorMap = mapValidationErrorService.mapValidationService(result);
         if (errorMap != null) return errorMap;
@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable final String userId) {
 
         userService.deleteUser(userId);
 
@@ -58,7 +58,7 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<?> deleteAccount(Principal principal) {
+    public ResponseEntity<?> deleteAccount(final Principal principal) {
 
         userService.deleteAccount(principal);
 
@@ -66,7 +66,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMe(Principal principal) {
+    public ResponseEntity<?> getMe(final Principal principal) {
 
         final User user = userService.getMe(principal);
 
@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) throws Exception {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody final LoginRequest loginRequest, final BindingResult result) throws Exception {
 
         final ResponseEntity<?> errorMap = mapValidationErrorService.mapValidationService(result);
 
@@ -93,7 +93,7 @@ public class UserController {
     }
 
     @GetMapping("/sign-up/confirm")
-    ResponseEntity<?> confirmMail(@RequestParam("token") String token) {
+    ResponseEntity<?> confirmMail(@RequestParam("token") final String token) {
 
         final Optional<ConfirmationToken> optionalConfirmationToken = confirmationTokenService.findConfirmationTokenByToken(token);
         optionalConfirmationToken.ifPresent(userService::confirmUser);
@@ -101,7 +101,7 @@ public class UserController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user, BindingResult result) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody final User user, final BindingResult result) {
 
         userValidator.validate(user, result);
         final ResponseEntity<?> errorMap = mapValidationErrorService.mapValidationService(result);
@@ -121,7 +121,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable String userId) {
+    public ResponseEntity<?> getUser(@PathVariable final String userId) {
 
         final User user = userService.getUser(userId);
 

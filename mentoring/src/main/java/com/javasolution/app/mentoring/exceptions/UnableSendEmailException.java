@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class UnableSendEmailException extends RuntimeException {
 
-    public UnableSendEmailException(String message) {
+    public UnableSendEmailException(final String message) {
         super(message);
     }
 }

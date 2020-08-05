@@ -20,7 +20,7 @@ public class MeetingBookingController {
     private final MeetingBookingService meetingBookingService;
 
     @PostMapping("/meetings/{meetingId}/bookings")
-    public ResponseEntity<?> bookingMeeting(@PathVariable String meetingId, Principal principal) {
+    public ResponseEntity<?> bookingMeeting(@PathVariable final String meetingId, final Principal principal) {
 
         final MeetingBooking meetingBooking = meetingBookingService.bookingMeeting(meetingId, principal);
 
@@ -28,7 +28,7 @@ public class MeetingBookingController {
     }
 
     @DeleteMapping("/bookings/{bookingId}")
-    public ResponseEntity<?> cancelBooking(@PathVariable String bookingId, Principal principal) {
+    public ResponseEntity<?> cancelBooking(@PathVariable final String bookingId, final Principal principal) {
 
         meetingBookingService.cancelBooking(bookingId, principal);
 
@@ -45,7 +45,7 @@ public class MeetingBookingController {
     }
 
     @GetMapping("/bookings/{bookingId}")
-    public ResponseEntity<?> getBooking(@PathVariable String bookingId) {
+    public ResponseEntity<?> getBooking(@PathVariable final String bookingId) {
 
         final MeetingBooking meetingBooking = meetingBookingService.getBooking(bookingId);
 
@@ -53,7 +53,7 @@ public class MeetingBookingController {
     }
 
     @GetMapping("/bookings/me/{bookingId}")
-    public ResponseEntity<?> getMyBooking(@PathVariable String bookingId, Principal principal) {
+    public ResponseEntity<?> getMyBooking(@PathVariable final String bookingId, final Principal principal) {
 
         final MeetingBooking meetingBooking = meetingBookingService.getMyBooking(bookingId, principal);
 
@@ -61,7 +61,7 @@ public class MeetingBookingController {
     }
 
     @GetMapping("/bookings/me")
-    public ResponseEntity<?> getAllMyBookings(Principal principal) {
+    public ResponseEntity<?> getAllMyBookings(final Principal principal) {
 
         final Iterable<MeetingBooking> meetingsBookings = meetingBookingService.getAllMyBookings(principal);
 

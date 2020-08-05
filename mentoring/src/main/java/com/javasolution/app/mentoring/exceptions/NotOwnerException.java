@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class NotOwnerException extends RuntimeException {
 
-    public NotOwnerException(String message) {
+    public NotOwnerException(final String message) {
         super(message);
     }
 }

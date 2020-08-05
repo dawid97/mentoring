@@ -9,12 +9,12 @@ import org.springframework.validation.Validator;
 public class UserValidator implements Validator {
 
     @Override
-    public boolean supports(Class<?> aClass) {
+    public boolean supports(final Class<?> aClass) {
         return User.class.equals(aClass);
     }
 
     @Override
-    public void validate(Object object, Errors errors) {
+    public void validate(final Object object, final Errors errors) {
         final User user = (User) object;
 
         if (user.getPassword() != null) {

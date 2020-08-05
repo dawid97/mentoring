@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidCastException extends RuntimeException {
 
-    public InvalidCastException(String message) {
+    public InvalidCastException(final String message) {
         super(message);
     }
 }

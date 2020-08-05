@@ -12,12 +12,12 @@ import java.time.LocalDate;
 public class MeetingValidator implements Validator {
 
     @Override
-    public boolean supports(Class<?> aClass) {
+    public boolean supports(final Class<?> aClass) {
         return Meeting.class.equals(aClass);
     }
 
     @Override
-    public void validate(Object object, Errors errors) {
+    public void validate(final Object object, final Errors errors) {
         final Meeting meeting = (Meeting) object;
 
         if (meeting.getMeetingDate().isBefore(LocalDate.now()))

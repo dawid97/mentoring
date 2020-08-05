@@ -17,7 +17,7 @@ import java.util.List;
 @Setter
 public class MeetingsAlreadyExistException extends RuntimeException {
 
-    List<MeetingModel> collisionMeetings;
+    final List<MeetingModel> collisionMeetings;
 
     @AllArgsConstructor
     @Getter
@@ -28,7 +28,7 @@ public class MeetingsAlreadyExistException extends RuntimeException {
         private LocalTime meetingEndTime;
     }
 
-    public MeetingsAlreadyExistException(String message, List<Meeting> collisionMeetings) {
+    public MeetingsAlreadyExistException(final String message, final List<Meeting> collisionMeetings) {
         super(message);
 
         this.collisionMeetings = new ArrayList<>();

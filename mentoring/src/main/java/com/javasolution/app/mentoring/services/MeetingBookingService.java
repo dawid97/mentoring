@@ -30,17 +30,17 @@ public class MeetingBookingService {
     private final JavaMailSender javaMailSender;
     private final MeetingRepository meetingRepository;
 
-    private void sendInfoAboutBookedMeeting(String userMail,
-                                            Meeting meeting,
-                                            String info,
-                                            String subject) throws MessagingException {
+    private void sendInfoAboutBookedMeeting(final String userMail,
+                                            final Meeting meeting,
+                                            final String info,
+                                            final String subject) throws MessagingException {
 
         final MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         final MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
         mimeMessageHelper.setTo(userMail);
         mimeMessageHelper.setSubject(subject);
 
-        String message = "<head>" +
+        final String message = "<head>" +
                 "<style type=\"text/css\">" +
                 ".red { color: #f00; }" +
                 "</style>" +
@@ -57,7 +57,7 @@ public class MeetingBookingService {
         javaMailSender.send(mimeMessage);
     }
 
-    public MeetingBooking bookingMeeting(String meetingId, Principal principal) {
+    public MeetingBooking bookingMeeting(final String meetingId, final Principal principal) {
 
         //check if meeting exists
         final Meeting meeting = meetingService.findMeeting(meetingId);
@@ -106,7 +106,7 @@ public class MeetingBookingService {
         return meetingBookingRepository.save(meetingBooking);
     }
 
-    protected MeetingBooking findMeetingBooking(String bookingId) {
+    protected MeetingBooking findMeetingBooking(final String bookingId) {
 
         final long id;
 
@@ -116,12 +116,12 @@ public class MeetingBookingService {
             throw new InvalidCastException("Meeting booking id have to be long type");
         }
 
-        Optional<MeetingBooking> meetingBooking = meetingBookingRepository.findById(id);
+        final Optional<MeetingBooking> meetingBooking = meetingBookingRepository.findById(id);
 
         return meetingBooking.orElse(null);
     }
 
-    public void cancelBooking(String bookingId, Principal principal) {
+    public void cancelBooking(final String bookingId, final Principal principal) {
 
         //check if meeting booking exists
         final MeetingBooking meetingBooking = findMeetingBooking(bookingId);
@@ -155,7 +155,7 @@ public class MeetingBookingService {
                     "Student: " + principal.getName() + " canceled the meeting!",
                     "Cancellation of the meeting!");
 
-        } catch (MessagingException ex) {
+        } catch (final MessagingException ex) {
             throw new UnableSendEmailException("Something went wrong. Please try again later");
         }
 
@@ -167,7 +167,7 @@ public class MeetingBookingService {
         return meetingBookingRepository.findAll();
     }
 
-    public MeetingBooking getBooking(String bookingId) {
+    public MeetingBooking getBooking(final String bookingId) {
 
         final MeetingBooking meetingBooking = findMeetingBooking(bookingId);
 
@@ -177,9 +177,9 @@ public class MeetingBookingService {
         return meetingBooking;
     }
 
-    public MeetingBooking getMyBooking(String bookingId, Principal principal) {
+    public MeetingBooking getMyBooking(final String bookingId, final Principal principal) {
 
-        MeetingBooking meetingBooking = findMeetingBooking(bookingId);
+        final MeetingBooking meetingBooking = findMeetingBooking(bookingId);
 
         if (meetingBooking == null)
             throw new MeetingBookingNotFoundException("Meeting booking with ID: '" + bookingId + "' was not found");
@@ -190,9 +190,9 @@ public class MeetingBookingService {
         return meetingBooking;
     }
 
-    public Iterable<MeetingBooking> getAllMyBookings(Principal principal) {
+    public Iterable<MeetingBooking> getAllMyBookings(final Principal principal) {
 
-        User student = userRepository.findByEmail(principal.getName());
+        final User student = userRepository.findByEmail(principal.getName());
 
         return meetingBookingRepository.findAllByStudent(student);
     }

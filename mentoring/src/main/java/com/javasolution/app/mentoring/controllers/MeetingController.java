@@ -24,7 +24,7 @@ public class MeetingController {
     private final MapValidationErrorService mapValidationErrorService;
 
     @PostMapping
-    public ResponseEntity<?> addMeeting(@RequestBody Meeting meeting, BindingResult result) {
+    public ResponseEntity<?> addMeeting(@RequestBody final Meeting meeting, final BindingResult result) {
 
         meetingValidator.validate(meeting, result);
 
@@ -37,7 +37,7 @@ public class MeetingController {
     }
 
     @DeleteMapping("/{meetingId}")
-    public ResponseEntity<?> deleteMeeting(@PathVariable String meetingId) {
+    public ResponseEntity<?> deleteMeeting(@PathVariable final String meetingId) {
 
         meetingService.deleteMeeting(meetingId);
 
@@ -46,7 +46,7 @@ public class MeetingController {
     }
 
     @PutMapping("/{meetingId}")
-    public ResponseEntity<?> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting, BindingResult result) {
+    public ResponseEntity<?> updateMeeting(@PathVariable final String meetingId, @RequestBody final Meeting meeting, final BindingResult result) {
 
         meetingValidator.validate(meeting, result);
 
@@ -67,7 +67,7 @@ public class MeetingController {
     }
 
     @GetMapping("/{meetingId}")
-    public ResponseEntity<?> getMeeting(@PathVariable String meetingId) {
+    public ResponseEntity<?> getMeeting(@PathVariable final String meetingId) {
 
         final Meeting meeting = meetingService.getMeeting(meetingId);
 
