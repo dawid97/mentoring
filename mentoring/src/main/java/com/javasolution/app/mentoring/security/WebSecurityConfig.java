@@ -1,9 +1,11 @@
 package com.javasolution.app.mentoring.security;
 
 
+import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.services.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,14 +38,43 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
+        final String STUDENT = UserRole.STUDENT.toString();
+        final String MENTOR = UserRole.MENTOR.toString();
+
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/users/sign-in", "/api/users/sign-up/**").permitAll()
-                .antMatchers("/api/meetings/**").permitAll()
-                .antMatchers("/api/users/**").permitAll()
-                .antMatchers("/api/bookings/**").permitAll()
+
+                //login and registration
+                .antMatchers(HttpMethod.POST, "/api/users/sign-in").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/users/sign-up").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/users/sign-up/confirm").permitAll()
+
+                //users
+                .antMatchers(HttpMethod.PUT, "/api/users/me").hasAnyAuthority(MENTOR,STUDENT)
+                .antMatchers(HttpMethod.DELETE, "/api/users/{userId}").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.DELETE, "/api/users/me").hasAuthority(STUDENT)
+                .antMatchers(HttpMethod.GET, "/api/users/me").hasAnyAuthority(STUDENT,MENTOR)
+                .antMatchers(HttpMethod.GET, "/api/users").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.GET, "/api/users/{userId}").hasAuthority(MENTOR)
+
+                //meetings
+                .antMatchers(HttpMethod.POST, "/api/meetings").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.DELETE, "/api/meetings/{meetingId}").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.PUT, "/api/meetings/{meetingId}").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.GET, "/api/meetings").hasAnyAuthority(MENTOR,STUDENT)
+                .antMatchers(HttpMethod.GET, "/api/meetings/{meetingId}").hasAnyAuthority(MENTOR,STUDENT)
+
+                //bookings
+                .antMatchers(HttpMethod.POST, "/api/meetings/{meetingId}/bookings").hasAuthority(STUDENT)
+                .antMatchers(HttpMethod.DELETE, "/api/bookings/{bookingId}").hasAuthority(STUDENT)
+                .antMatchers(HttpMethod.GET, "/api/bookings").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.GET, "/api/bookings/{bookingId}").hasAuthority(MENTOR)
+                .antMatchers(HttpMethod.GET, "/api/bookings/me/{bookingId}").hasAuthority(STUDENT)
+                .antMatchers(HttpMethod.GET, "/api/bookings/me").hasAuthority(STUDENT)
+
+
                 .anyRequest()
                 .authenticated()
                 .and().sessionManagement()
