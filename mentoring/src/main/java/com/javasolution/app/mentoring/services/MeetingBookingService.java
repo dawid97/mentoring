@@ -189,4 +189,11 @@ public class MeetingBookingService {
 
         return meetingBooking;
     }
+
+    public Iterable<MeetingBooking> getAllMyBookings(Principal principal) {
+
+        User student = userRepository.findByEmail(principal.getName());
+
+        return meetingBookingRepository.findAllByStudent(student);
+    }
 }
