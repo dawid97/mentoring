@@ -121,6 +121,24 @@ class UserControllerTest {
     }
 
     @Test
+    void deleteAccount_userInDatabase_userDeleted() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        final MvcResult result = mockMvc.perform(delete("/api/users/me/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final String response = result.getResponse().getContentAsString();
+        final JSONObject responseJson = new JSONObject(response);
+        assertEquals("Account deleted successfully", responseJson.getString("user"));
+        assertEquals(1, userRepository.count());
+    }
+
+    @Test
     void deleteAccount_userInDatabase_MeetingBookingAlreadyExistsException() throws Exception {
 
         //create meeting
