@@ -10,6 +10,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
+import com.javasolution.app.mentoring.exceptions.MeetingBookedException;
 import com.javasolution.app.mentoring.exceptions.MeetingNotFoundException;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -78,6 +79,36 @@ class MeetingControllerTest {
     void tearDown() {
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void updateMeeting_meetingInDatabase_someoneBookedMeeting_meetingBookedException() throws Exception {
+
+        //find meeting
+        final Optional<Meeting> meeting = meetingRepository.findById(meetingId);
+
+        //changeStatus
+        if (meeting.isPresent()) {
+            meeting.get().setBooked(true);
+            meetingRepository.save(meeting.get());
+        }
+
+        assertEquals(1, meetingRepository.count());
+        final JSONObject updateMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "19:15:00")
+                .put("meetingEndTime", "19:30:00");
+        final String updateMeetingRequestJsonAsString = updateMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(put("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingBookedException))
+                .andExpect(result -> assertEquals("You can not update meeting with ID: '" + meetingId + "' because someone booked the meeting"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
