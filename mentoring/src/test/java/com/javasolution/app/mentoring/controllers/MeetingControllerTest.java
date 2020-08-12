@@ -1,5 +1,6 @@
 package com.javasolution.app.mentoring.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -77,6 +79,26 @@ class MeetingControllerTest {
     void tearDown() {
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void getAllMeetings() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        final MvcResult result = mockMvc.perform(get("/api/meetings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<Meeting> meetings = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(1, meetings.size());
+        assertEquals(meetingId, meetings.get(0).getId());
     }
 
     @Test
