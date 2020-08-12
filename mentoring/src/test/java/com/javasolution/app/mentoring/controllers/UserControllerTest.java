@@ -11,6 +11,7 @@ import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.*;
+import com.javasolution.app.mentoring.repositories.ConfirmationTokenRepository;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -54,6 +55,9 @@ class UserControllerTest {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
+    private ConfirmationTokenRepository confirmationTokenRepository;
+
+    @Autowired
     ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
@@ -70,6 +74,7 @@ class UserControllerTest {
 
     Long mentorId;
     Long studentId;
+    Long unconfirmedStudentId;
 
     @BeforeEach
     void setUp() {
@@ -81,6 +86,7 @@ class UserControllerTest {
     void tearDown() {
         meetingBookingRepository.deleteAll();
         meetingRepository.deleteAll();
+        confirmationTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -116,6 +122,34 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void registerUser_userRegistered() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        final User registerUserRequest = new User();
+        registerUserRequest.setEmail("dawid_19_97@interia.pl");
+        registerUserRequest.setName("Tomek");
+        registerUserRequest.setSurname("Malolepszy");
+        registerUserRequest.setPassword("pass123456");
+        registerUserRequest.setConfirmPassword("pass123456");
+        final Gson gson = new Gson();
+        final String requestJson = gson.toJson(registerUserRequest);
+
+        MvcResult result = mockMvc.perform(post("/api/users/sign-up")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final User user = parseResponse(result, User.class);
+        assertNotNull(user);
+        assertEquals(registerUserRequest.getEmail(), user.getEmail());
+        assertEquals(registerUserRequest.getName(), user.getName());
+        assertEquals(registerUserRequest.getSurname(), user.getSurname());
+        assertEquals(3, userRepository.count());
+        unconfirmedStudentId = user.getId();
     }
 
     @Test
