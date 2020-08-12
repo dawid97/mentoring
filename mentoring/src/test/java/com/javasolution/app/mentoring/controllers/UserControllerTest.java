@@ -98,6 +98,19 @@ class UserControllerTest {
     }
 
     @Test
+    void authenticateUser_userNotInDatabase_userNotReceivedAccess() throws Exception {
+
+        final LoginRequest loginRequest = new LoginRequest("thomas5678@gmail.com", "p123456789");
+        final Gson gson = new Gson();
+        final String requestJson = gson.toJson(loginRequest);
+
+        mockMvc.perform(post("/api/users/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void getUser_userInDatabase_userFound() throws Exception {
 
         final String jwt = login(mentor.getEmail(), mentor.getPassword());
