@@ -122,6 +122,24 @@ class UserControllerTest {
     }
 
     @Test
+    void deleteUser_userNotInDatabase_userNotFoundException() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        final String userId = "123456";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(delete("/api/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+                .andExpect(result -> assertEquals("User with ID: '" + userId + "' not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(2, userRepository.count());
+    }
+
+    @Test
     void deleteUser_userInDatabase_deleteAccountException() throws Exception {
 
         assertEquals(2, userRepository.count());
