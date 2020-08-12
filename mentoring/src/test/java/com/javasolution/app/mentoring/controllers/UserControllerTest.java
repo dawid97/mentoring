@@ -10,10 +10,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
-import com.javasolution.app.mentoring.exceptions.DeleteAccountException;
-import com.javasolution.app.mentoring.exceptions.InvalidCastException;
-import com.javasolution.app.mentoring.exceptions.MeetingBookingAlreadyExistsException;
-import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
+import com.javasolution.app.mentoring.exceptions.*;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -119,6 +116,29 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void registerUser_usernameAlreadyExistsException() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        final User registerUserRequest = new User();
+        registerUserRequest.setEmail("dawulf97@gmail.com");
+        registerUserRequest.setName("Dawid");
+        registerUserRequest.setSurname("Bula");
+        registerUserRequest.setPassword("pass123456");
+        registerUserRequest.setConfirmPassword("pass123456");
+        final Gson gson = new Gson();
+        final String requestJson = gson.toJson(registerUserRequest);
+
+        mockMvc.perform(post("/api/users/sign-up")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UsernameAlreadyExistsException))
+                .andExpect(result -> assertEquals("Email '" + registerUserRequest.getEmail() + "' already exists"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(2, userRepository.count());
     }
 
     @Test
