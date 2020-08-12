@@ -12,6 +12,7 @@ import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.MeetingBookedException;
 import com.javasolution.app.mentoring.exceptions.MeetingNotFoundException;
+import com.javasolution.app.mentoring.exceptions.MeetingsAlreadyExistException;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
@@ -79,6 +80,38 @@ class MeetingControllerTest {
     void tearDown() {
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void updateMeeting_wrongTime_meetingTimeException() throws Exception {
+
+        //create meeting
+        final Meeting meeting = new Meeting();
+        meeting.setMeetingDate(LocalDate.now());
+        meeting.setMeetingStartTime(LocalTime.of(20, 15, 0, 0));
+        meeting.setMeetingEndTime(LocalTime.of(20, 30, 0, 0));
+        meeting.setBooked(false);
+        meeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> mentor = userRepository.findById(mentorId);
+        mentor.ifPresent(meeting::setMentor);
+        meetingRepository.save(meeting);
+
+        assertEquals(2, meetingRepository.count());
+        final JSONObject updateMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "20:15:00")
+                .put("meetingEndTime", "20:30:00");
+        final String updateMeetingRequestJsonAsString = updateMeetingRequestJson.toString();
+        final String jwt = login(this.mentor.getEmail(), this.mentor.getPassword());
+
+        mockMvc.perform(put("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingsAlreadyExistException))
+                .andExpect(result -> assertEquals("Meetings already exist"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
