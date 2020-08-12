@@ -36,8 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -79,6 +78,31 @@ class MeetingControllerTest {
     void tearDown() {
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void updateMeeting_meetingInDatabase_meetingUpdatedSuccessfully() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final JSONObject updateMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "19:15:00")
+                .put("meetingEndTime", "19:30:00");
+        final String updateMeetingRequestJsonAsString = updateMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        final MvcResult result = mockMvc.perform(put("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final Meeting updatedMeeting = parseResponse(result, Meeting.class);
+        assertEquals(meeting.getId(), updatedMeeting.getId());
+        assertEquals(updateMeetingRequestJson.getString("meetingDate"), updatedMeeting.getMeetingDate().toString());
+        assertEquals(updateMeetingRequestJson.getString("meetingStartTime"), updatedMeeting.getMeetingStartTime().toString() + ":00");
+        assertEquals(updateMeetingRequestJson.getString("meetingEndTime"), updatedMeeting.getMeetingEndTime().toString() + ":00");
     }
 
     @Test
