@@ -81,6 +81,28 @@ class MeetingControllerTest {
     }
 
     @Test
+    void updateMeeting_meetingNotInDatabase_meetingNotFoundException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String wrongMeetingId = "123456";
+        final JSONObject updateMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "19:15:00")
+                .put("meetingEndTime", "19:30:00");
+        final String updateMeetingRequestJsonAsString = updateMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(put("/api/meetings/{meetingId}", wrongMeetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingNotFoundException))
+                .andExpect(result -> assertEquals("Meeting with ID: '" + wrongMeetingId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void updateMeeting_meetingInDatabase_meetingUpdatedSuccessfully() throws Exception {
 
         assertEquals(1, meetingRepository.count());
