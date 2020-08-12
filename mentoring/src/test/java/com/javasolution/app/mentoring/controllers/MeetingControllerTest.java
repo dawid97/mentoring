@@ -9,6 +9,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
+import com.javasolution.app.mentoring.exceptions.MeetingNotFoundException;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
@@ -76,6 +77,22 @@ class MeetingControllerTest {
     void tearDown() {
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void getMeeting_meetingNotInDatabase_meetingNotFoundException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+        final String wrongMeetingId = "12345";
+
+        mockMvc.perform(get("/api/meetings/{meetingId}", wrongMeetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingNotFoundException))
+                .andExpect(result -> assertEquals("Meeting with ID: '" + wrongMeetingId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
