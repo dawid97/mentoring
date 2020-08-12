@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
-import com.javasolution.app.mentoring.entities.Meeting;
-import com.javasolution.app.mentoring.entities.MeetingBooking;
-import com.javasolution.app.mentoring.entities.User;
-import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.entities.*;
 import com.javasolution.app.mentoring.exceptions.*;
 import com.javasolution.app.mentoring.repositories.ConfirmationTokenRepository;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
@@ -122,6 +119,33 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void confirmMail() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        registerUser_userRegistered();
+        assertEquals(3, userRepository.count());
+
+        assertEquals(1, confirmationTokenRepository.count());
+        final ConfirmationToken token = confirmationTokenRepository.findConfirmationTokenByUserId(unconfirmedStudentId);
+
+        final Optional<User> user = userRepository.findById(unconfirmedStudentId);
+        assertNotNull(user);
+        assertEquals(false, user.get().getEnabled());
+
+        mockMvc.perform(get("/api/users/sign-up/confirm?token=" + token.getConfirmationToken())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertEquals("verified email", result.getResponse().getContentAsString()))
+                .andReturn();
+
+        final Optional<User> updatedUser = userRepository.findById(unconfirmedStudentId);
+        assertNotNull(updatedUser);
+        assertEquals(true, updatedUser.get().getEnabled());
+
+        assertEquals(0, confirmationTokenRepository.count());
     }
 
     @Test

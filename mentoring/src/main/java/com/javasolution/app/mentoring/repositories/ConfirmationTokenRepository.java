@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ConfirmationTokenRepository extends CrudRepository<ConfirmationToken, Long> {
     Optional<ConfirmationToken> findConfirmationTokenByConfirmationToken(final String token);
+    ConfirmationToken findConfirmationTokenByUserId(Long id);
 }
