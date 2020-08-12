@@ -83,6 +83,29 @@ class MeetingControllerTest {
     }
 
     @Test
+    void addMeeting_mentorNotFoundException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final JSONObject createMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "18:30:00")
+                .put("meetingEndTime", "20:30:00");
+        final String createMeetingRequestJsonAsString = createMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(post("/api/meetings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingsAlreadyExistException))
+                .andExpect(result -> assertEquals("Meetings already exist"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(1, meetingRepository.count());
+    }
+
+    @Test
     void addMeeting_meetingsCreatedSuccessfully() throws Exception {
 
         assertEquals(1, meetingRepository.count());
