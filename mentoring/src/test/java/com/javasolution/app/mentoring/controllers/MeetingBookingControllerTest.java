@@ -10,6 +10,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,6 +87,22 @@ class MeetingBookingControllerTest {
         meetingBookingRepository.deleteAll();
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void getBooking_wrongMeetingBookingIdType_invalidCastException() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String wrongBookingId = "as";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(get("/api/bookings/{bookingId}", wrongBookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidCastException))
+                .andExpect(result -> assertEquals("Meeting booking id have to be long type"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
