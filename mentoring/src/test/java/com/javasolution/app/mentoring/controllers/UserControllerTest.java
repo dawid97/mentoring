@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
@@ -124,6 +125,21 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
                 .andExpect(result -> assertEquals("User with ID: '" + userId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
+    void getUser_wrongIdFormat_invalidCastException() throws Exception {
+
+        final String userId = "as";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(get("/api/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidCastException))
+                .andExpect(result -> assertEquals("User id have to be long type"
                         , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
