@@ -10,6 +10,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.DeleteAccountException;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.MeetingBookingAlreadyExistsException;
 import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
@@ -118,6 +119,23 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void deleteUser_userInDatabase_deleteAccountException() throws Exception {
+
+        assertEquals(2, userRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(delete("/api/users/{userId}", mentorId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof DeleteAccountException))
+                .andExpect(result -> assertEquals("You can not delete account because this is mentor"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(2, userRepository.count());
     }
 
     @Test
