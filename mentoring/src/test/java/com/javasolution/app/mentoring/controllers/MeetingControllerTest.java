@@ -83,6 +83,28 @@ class MeetingControllerTest {
     }
 
     @Test
+    void updateMeeting_wrongMeetingIdType_invalidCastException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String wrongMeetingId = "as";
+        final JSONObject updateMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "19:15:00")
+                .put("meetingEndTime", "19:30:00");
+        final String updateMeetingRequestJsonAsString = updateMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(put("/api/meetings/{meetingId}", wrongMeetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidCastException))
+                .andExpect(result -> assertEquals("Meeting id have to be long type"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void updateMeeting_wrongTime_meetingTimeException() throws Exception {
 
         //create meeting
