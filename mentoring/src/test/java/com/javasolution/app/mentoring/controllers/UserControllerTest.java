@@ -122,6 +122,52 @@ class UserControllerTest {
     }
 
     @Test
+    void deleteUser_userInDatabase_userDeleted() throws Exception {
+
+        //create meeting
+        final Meeting meeting = new Meeting();
+        meeting.setMeetingDate(LocalDate.now());
+        meeting.setMeetingStartTime(LocalTime.of(19, 0, 0, 0));
+        meeting.setMeetingEndTime(LocalTime.of(19, 15, 0, 0));
+        meeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> foundMentor = userRepository.findById(mentorId);
+        foundMentor.ifPresent(meeting::setMentor);
+        Meeting unbookedMeeting = meetingRepository.save(meeting);
+        unbookedMeeting.setBooked(true);
+        final Meeting savedMeeting = meetingRepository.save(unbookedMeeting);
+
+        //create booking
+        final MeetingBooking meetingBooking = new MeetingBooking();
+        meetingBooking.setMeeting(savedMeeting);
+        meetingBooking.setCreateAt(LocalDateTime.now());
+        final Optional<User> foundStudent = userRepository.findById(studentId);
+        foundStudent.ifPresent(meetingBooking::setStudent);
+        meetingBookingRepository.save(meetingBooking);
+
+
+        assertEquals(true, savedMeeting.getBooked());
+        assertEquals(1, meetingBookingRepository.count());
+        assertEquals(1, meetingRepository.count());
+        assertEquals(2, userRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        MvcResult result = mockMvc.perform(delete("/api/users/{userId}", studentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final String response = result.getResponse().getContentAsString();
+        final JSONObject responseJson = new JSONObject(response);
+        assertEquals("Account with ID: '" + studentId + "' deleted successfully", responseJson.getString("user"));
+        assertEquals(1, userRepository.count());
+        assertEquals(0, meetingBookingRepository.count());
+
+        Meeting foundMeeting = meetingRepository.findById(savedMeeting.getId()).get();
+        assertEquals(false, foundMeeting.getBooked());
+    }
+
+    @Test
     void deleteUser_userNotInDatabase_userNotFoundException() throws Exception {
 
         assertEquals(2, userRepository.count());
