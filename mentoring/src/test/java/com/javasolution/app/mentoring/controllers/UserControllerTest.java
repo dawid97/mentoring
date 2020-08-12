@@ -6,10 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
+import com.javasolution.app.mentoring.entities.Meeting;
+import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
+import com.javasolution.app.mentoring.exceptions.MeetingBookingAlreadyExistsException;
 import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
+import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
+import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
 import com.javasolution.app.mentoring.requests.UpdateUserRequest;
@@ -27,8 +32,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -50,6 +59,12 @@ class UserControllerTest {
     ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
+    private MeetingBookingRepository meetingBookingRepository;
+
+    @Autowired
+    private MeetingRepository meetingRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private User mentor;
@@ -66,6 +81,8 @@ class UserControllerTest {
 
     @AfterEach
     void tearDown() {
+        meetingBookingRepository.deleteAll();
+        meetingRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -101,6 +118,45 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void deleteAccount_userInDatabase_MeetingBookingAlreadyExistsException() throws Exception {
+
+        //create meeting
+        final Meeting meeting = new Meeting();
+        meeting.setMeetingDate(LocalDate.now());
+        meeting.setMeetingStartTime(LocalTime.of(19, 0, 0, 0));
+        meeting.setMeetingEndTime(LocalTime.of(19, 15, 0, 0));
+        meeting.setBooked(false);
+        meeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> mentor = userRepository.findById(mentorId);
+        mentor.ifPresent(meeting::setMentor);
+        final Meeting savedMeeting = meetingRepository.save(meeting);
+
+        //create booking
+        final MeetingBooking meetingBooking = new MeetingBooking();
+        meetingBooking.setMeeting(savedMeeting);
+        meetingBooking.setCreateAt(LocalDateTime.now());
+        final Optional<User> student = userRepository.findById(studentId);
+        student.ifPresent(meetingBooking::setStudent);
+        meetingBookingRepository.save(meetingBooking);
+
+        assertEquals(2, userRepository.count());
+        assertEquals(1, meetingBookingRepository.count());
+        assertEquals(1, meetingRepository.count());
+
+        final String jwt = login(this.student.getEmail(), this.student.getPassword());
+
+        mockMvc.perform(delete("/api/users/me/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingBookingAlreadyExistsException))
+                .andExpect(result -> assertEquals("You can not delete account because you have bookings"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(2, userRepository.count());
     }
 
     @Test
