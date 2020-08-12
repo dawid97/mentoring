@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
+import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
 import org.json.JSONObject;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -108,6 +110,21 @@ class UserControllerTest {
         final User user = parseResponse(result, User.class);
         assertNotNull(user);
         assertEquals(studentId, user.getId());
+    }
+
+    @Test
+    void getUser_userNotInDatabase_userNotFoundException() throws Exception {
+
+        final String userId = "123";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(get("/api/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+                .andExpect(result -> assertEquals("User with ID: '" + userId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
 
