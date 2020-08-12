@@ -83,6 +83,30 @@ class MeetingControllerTest {
     }
 
     @Test
+    void deleteMeeting_someoneBookedMeeting_meetingBookedException() throws Exception {
+
+        //find meeting
+        final Optional<Meeting> meeting = meetingRepository.findById(meetingId);
+
+        //changeStatus
+        if (meeting.isPresent()) {
+            meeting.get().setBooked(true);
+            meetingRepository.save(meeting.get());
+        }
+
+        assertEquals(1, meetingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(delete("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingBookedException))
+                .andExpect(result -> assertEquals("You can not delete meeting with ID: '" + meetingId + "' because someone booked the meeting"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void deleteMeeting_wrongMeetingIdType_invalidCastException() throws Exception {
 
         assertEquals(1, meetingRepository.count());
