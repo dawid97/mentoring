@@ -83,6 +83,24 @@ class MeetingControllerTest {
     }
 
     @Test
+    void deleteMeeting_meetingInDatabase_meetingDeletedSuccessfully() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        MvcResult result = mockMvc.perform(delete("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final String response = result.getResponse().getContentAsString();
+        final JSONObject responseJson = new JSONObject(response);
+        assertEquals("Meeting with ID: '" + meetingId + "' was deleted", responseJson.getString("meeting"));
+        assertEquals(0, meetingRepository.count());
+    }
+
+    @Test
     void updateMeeting_wrongMeetingIdType_invalidCastException() throws Exception {
 
         assertEquals(1, meetingRepository.count());
