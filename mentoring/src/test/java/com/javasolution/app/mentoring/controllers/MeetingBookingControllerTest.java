@@ -91,6 +91,36 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void bookingMeeting_meetingBookedSuccessfully() throws Exception {
+
+        //create new meeting
+        final Meeting otherMeeting = new Meeting();
+        otherMeeting.setMeetingDate(LocalDate.now());
+        otherMeeting.setMeetingStartTime(LocalTime.of(20, 0, 0, 0));
+        otherMeeting.setMeetingEndTime(LocalTime.of(20, 15, 0, 0));
+        otherMeeting.setBooked(false);
+        otherMeeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> foundMentor = userRepository.findById(mentorId);
+        foundMentor.ifPresent(otherMeeting::setMentor);
+        final Meeting savedMeeting = meetingRepository.save(otherMeeting);
+
+        assertEquals(2, meetingRepository.count());
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        final MvcResult result = mockMvc.perform(post("/api/meetings/{meetingId}/bookings", savedMeeting.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final MeetingBooking savedMeetingBooking = parseResponse(result, MeetingBooking.class);
+        assertNotNull(meetingBooking);
+        assertEquals(savedMeeting.getId(), savedMeetingBooking.getMeeting().getId());
+        assertEquals(studentId, savedMeetingBooking.getStudent().getId());
+    }
+
+    @Test
     void cancelBooking_bookingCanceledSuccessfully() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
