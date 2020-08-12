@@ -11,6 +11,7 @@ import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
+import com.javasolution.app.mentoring.exceptions.MeetingBookingNotFoundException;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -87,6 +88,22 @@ class MeetingBookingControllerTest {
         meetingBookingRepository.deleteAll();
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void getBooking_meetingBookingNotInDatabase_meetingBookingNotFoundException() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String wrongBookingId = "123456";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(get("/api/bookings/{bookingId}", wrongBookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingBookingNotFoundException))
+                .andExpect(result -> assertEquals("Meeting booking with ID: '" + wrongBookingId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
