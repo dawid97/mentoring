@@ -98,6 +98,23 @@ class UserControllerTest {
     }
 
     @Test
+    void authenticateUser_userInDatabase_userReceivedAccess() throws Exception {
+
+        final LoginRequest loginRequest = new LoginRequest(mentor.getEmail(), mentor.getPassword());
+        final Gson gson = new Gson();
+        final String requestJson = gson.toJson(loginRequest);
+
+        final MvcResult result = mockMvc.perform(post("/api/users/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final String responseJson = result.getResponse().getContentAsString();
+        assertTrue(responseJson.contains("jwt"));
+    }
+
+    @Test
     void authenticateUser_userNotInDatabase_userNotReceivedAccess() throws Exception {
 
         final LoginRequest loginRequest = new LoginRequest("thomas5678@gmail.com", "p123456789");
