@@ -12,6 +12,7 @@ import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
 import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.MeetingBookingNotFoundException;
+import com.javasolution.app.mentoring.exceptions.NotOwnerException;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -38,8 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -88,6 +88,54 @@ class MeetingBookingControllerTest {
         meetingBookingRepository.deleteAll();
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void cancelBooking_failure_notOwnerException() throws Exception {
+
+        //create other student
+        final User otherStudent = new User();
+        otherStudent.setPassword("pass123456");
+        otherStudent.setPassword(bCryptPasswordEncoder.encode(student.getPassword()));
+        otherStudent.setConfirmPassword("");
+        otherStudent.setName("Tomek");
+        otherStudent.setSurname("Kanapka");
+        otherStudent.setEmail("tomcio@gmail.com");
+        otherStudent.setUserRole(UserRole.STUDENT);
+        otherStudent.setEnabled(true);
+        final User savedStudent = userRepository.save(otherStudent);
+        otherStudent.setPassword("pass123456");
+
+        //create other meeting
+        final Meeting otherMeeting = new Meeting();
+        otherMeeting.setMeetingDate(LocalDate.now());
+        otherMeeting.setMeetingStartTime(LocalTime.of(20, 0, 0, 0));
+        otherMeeting.setMeetingEndTime(LocalTime.of(20, 15, 0, 0));
+        otherMeeting.setBooked(false);
+        otherMeeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> foundMentor = userRepository.findById(mentorId);
+        foundMentor.ifPresent(otherMeeting::setMentor);
+        final Meeting savedMeeting = meetingRepository.save(otherMeeting);
+
+        //create other booking
+        final MeetingBooking otherMeetingBooking = new MeetingBooking();
+        otherMeetingBooking.setStudent(savedStudent);
+        otherMeetingBooking.setCreateAt(LocalDateTime.now());
+        otherMeetingBooking.setMeeting(savedMeeting);
+        final MeetingBooking savedMeetingBooking = meetingBookingRepository.save(otherMeetingBooking);
+
+        assertEquals(2, meetingBookingRepository.count());
+        assertEquals(3, userRepository.count());
+        assertEquals(2, meetingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        mockMvc.perform(delete("/api/bookings/{bookingId}", savedMeetingBooking.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotOwnerException))
+                .andExpect(result -> assertEquals("You are not owner the meeting booking"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
