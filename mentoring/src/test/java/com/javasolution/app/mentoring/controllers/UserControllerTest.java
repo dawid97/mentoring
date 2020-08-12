@@ -12,6 +12,7 @@ import com.javasolution.app.mentoring.exceptions.InvalidCastException;
 import com.javasolution.app.mentoring.exceptions.UserNotFoundException;
 import com.javasolution.app.mentoring.repositories.UserRepository;
 import com.javasolution.app.mentoring.requests.LoginRequest;
+import com.javasolution.app.mentoring.requests.UpdateUserRequest;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -101,6 +101,28 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void updateMe() throws Exception {
+
+        final String updatedName = "Dawidek";
+        final String updatedSurname = "Ulfikos";
+        final UpdateUserRequest updateUserRequest = new UpdateUserRequest(updatedName, updatedSurname);
+        final String jwt = login(student.getEmail(), student.getPassword());
+        final Gson gson = new Gson();
+        final String requestJson = gson.toJson(updateUserRequest);
+
+        final MvcResult result = mockMvc.perform(put("/api/users/me")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final User user = parseResponse(result, User.class);
+        assertEquals(updatedName, user.getName());
+        assertEquals(updatedSurname, user.getSurname());
     }
 
     @Test
