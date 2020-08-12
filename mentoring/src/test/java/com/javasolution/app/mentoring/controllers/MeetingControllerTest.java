@@ -83,6 +83,22 @@ class MeetingControllerTest {
     }
 
     @Test
+    void deleteMeeting_wrongMeetingIdType_invalidCastException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        String wrongMeetingId = "as";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(delete("/api/meetings/{meetingId}", wrongMeetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidCastException))
+                .andExpect(result -> assertEquals("Meeting id have to be long type"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void deleteMeeting_meetingNotInDatabase_meetingNotFoundException() throws Exception {
 
         assertEquals(1, meetingRepository.count());
