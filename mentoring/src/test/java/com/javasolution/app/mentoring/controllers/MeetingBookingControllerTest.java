@@ -91,6 +91,24 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void cancelBooking_bookingCanceledSuccessfully() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        MvcResult result = mockMvc.perform(delete("/api/bookings/{bookingId}", bookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final String response = result.getResponse().getContentAsString();
+        final JSONObject responseJson = new JSONObject(response);
+        assertEquals("Meeting booking with ID: '" + bookingId + "' was deleted", responseJson.getString("meetingBooking"));
+        assertEquals(0, meetingBookingRepository.count());
+    }
+
+    @Test
     void cancelBooking_wrongBookingId_invalidCastException() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
