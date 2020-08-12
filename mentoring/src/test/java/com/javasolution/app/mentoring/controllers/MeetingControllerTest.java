@@ -80,6 +80,23 @@ class MeetingControllerTest {
     }
 
     @Test
+    void getMeeting_meetingInDatabase_meetingReturnedSuccessfully() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        final MvcResult result = mockMvc.perform(get("/api/meetings/{meetingId}", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final Meeting meeting = parseResponse(result, Meeting.class);
+        assertNotNull(meeting);
+        assertEquals(meetingId, meeting.getId());
+    }
+
+    @Test
     void getMeeting_meetingNotInDatabase_meetingNotFoundException() throws Exception {
 
         assertEquals(1, meetingRepository.count());
