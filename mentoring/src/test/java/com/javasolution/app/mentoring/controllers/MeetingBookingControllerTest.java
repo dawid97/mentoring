@@ -10,10 +10,7 @@ import com.javasolution.app.mentoring.entities.Meeting;
 import com.javasolution.app.mentoring.entities.MeetingBooking;
 import com.javasolution.app.mentoring.entities.User;
 import com.javasolution.app.mentoring.entities.UserRole;
-import com.javasolution.app.mentoring.exceptions.InvalidCastException;
-import com.javasolution.app.mentoring.exceptions.MeetingBookingNotFoundException;
-import com.javasolution.app.mentoring.exceptions.MeetingNotFoundException;
-import com.javasolution.app.mentoring.exceptions.NotOwnerException;
+import com.javasolution.app.mentoring.exceptions.*;
 import com.javasolution.app.mentoring.repositories.MeetingBookingRepository;
 import com.javasolution.app.mentoring.repositories.MeetingRepository;
 import com.javasolution.app.mentoring.repositories.UserRepository;
@@ -89,6 +86,23 @@ class MeetingBookingControllerTest {
         meetingBookingRepository.deleteAll();
         meetingRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    void bookingMeeting_failure_meetingBookingAlreadyExistsException() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        mockMvc.perform(post("/api/meetings/{meetingId}/bookings", meetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingBookingAlreadyExistsException))
+                .andExpect(result -> assertEquals("Meeting with ID: '" + meetingId + "' is already booked"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+        assertEquals(1, meetingBookingRepository.count());
     }
 
     @Test
