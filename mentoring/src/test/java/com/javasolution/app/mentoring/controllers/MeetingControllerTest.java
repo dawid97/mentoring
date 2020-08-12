@@ -83,6 +83,22 @@ class MeetingControllerTest {
     }
 
     @Test
+    void deleteMeeting_meetingNotInDatabase_meetingNotFoundException() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        String wrongMeetingId = "123456";
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        mockMvc.perform(delete("/api/meetings/{meetingId}", wrongMeetingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MeetingNotFoundException))
+                .andExpect(result -> assertEquals("Meeting with ID: '" + wrongMeetingId + "' was not found"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void deleteMeeting_meetingInDatabase_meetingDeletedSuccessfully() throws Exception {
 
         assertEquals(1, meetingRepository.count());
