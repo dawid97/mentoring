@@ -1,5 +1,6 @@
 package com.javasolution.app.mentoring.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +45,9 @@ class UserControllerTest {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private UserRepository userRepository;
@@ -96,6 +101,28 @@ class UserControllerTest {
         final User savedMentor = userRepository.save(mentor);
         mentorId = savedMentor.getId();
         mentor.setPassword("pass999967");
+    }
+
+    @Test
+    void getAllUsers() throws Exception {
+
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        final MvcResult result = mockMvc.perform(get("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<User> users = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(2, users.size());
+        assertEquals(mentorId, users.get(0).getId());
+        assertEquals(mentor.getEmail(), users.get(0).getEmail());
+        assertEquals(studentId, users.get(1).getId());
+        assertEquals(student.getEmail(), users.get(1).getEmail());
     }
 
     @Test
