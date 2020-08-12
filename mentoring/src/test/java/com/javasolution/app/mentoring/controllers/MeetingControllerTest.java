@@ -83,6 +83,42 @@ class MeetingControllerTest {
     }
 
     @Test
+    void addMeeting_meetingsCreatedSuccessfully() throws Exception {
+
+        assertEquals(1, meetingRepository.count());
+        final JSONObject createMeetingRequestJson = new JSONObject()
+                .put("meetingDate", LocalDate.now().toString())
+                .put("meetingStartTime", "20:15:00")
+                .put("meetingEndTime", "21:00:00");
+        final String createMeetingRequestJsonAsString = createMeetingRequestJson.toString();
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        MvcResult result = mockMvc.perform(post("/api/meetings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createMeetingRequestJsonAsString)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        final List<Meeting> meetings = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(3, meetings.size());
+
+        assertEquals("20:15:00", meetings.get(0).getMeetingStartTime().toString() + ":00");
+        assertEquals("20:30:00", meetings.get(0).getMeetingEndTime() + ":00");
+
+        assertEquals("20:30:00", meetings.get(1).getMeetingStartTime().toString() + ":00");
+        assertEquals("20:45:00", meetings.get(1).getMeetingEndTime() + ":00");
+
+        assertEquals("20:45:00", meetings.get(2).getMeetingStartTime().toString() + ":00");
+        assertEquals("21:00:00", meetings.get(2).getMeetingEndTime() + ":00");
+
+        assertEquals(4, meetingRepository.count());
+    }
+
+    @Test
     void deleteMeeting_someoneBookedMeeting_meetingBookedException() throws Exception {
 
         //find meeting
