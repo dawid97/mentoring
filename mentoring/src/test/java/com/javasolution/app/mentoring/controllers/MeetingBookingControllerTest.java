@@ -91,6 +91,28 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void getAllBookings() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+        final MvcResult result = mockMvc.perform(get("/api/bookings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<MeetingBooking> bookings = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertEquals(1, bookings.size());
+        assertEquals(bookingId, bookings.get(0).getId());
+        assertEquals(studentId, bookings.get(0).getStudent().getId());
+        assertEquals(meetingId, bookings.get(0).getMeeting().getId());
+    }
+
+    @Test
     void getBooking_meetingBookingNotInDatabase_meetingBookingNotFoundException() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
