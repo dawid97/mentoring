@@ -89,6 +89,34 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void getMyBooking_bookingInDatabase_notOwnerException() throws Exception {
+
+        //create other student
+        User otherStudent = new User();
+        otherStudent.setPassword("pass123456");
+        otherStudent.setPassword(bCryptPasswordEncoder.encode(otherStudent.getPassword()));
+        otherStudent.setConfirmPassword("");
+        otherStudent.setName("Tomek");
+        otherStudent.setSurname("Kanapka");
+        otherStudent.setEmail("kanapos89@gmail.com");
+        otherStudent.setUserRole(UserRole.STUDENT);
+        otherStudent.setEnabled(true);
+        userRepository.save(otherStudent);
+        otherStudent.setPassword("pass123456");
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(otherStudent.getEmail(), otherStudent.getPassword());
+
+        mockMvc.perform(get("/api/bookings/me/{bookingId}", bookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotOwnerException))
+                .andExpect(result -> assertEquals("You are not owner the meeting booking"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
     void getMyBooking_bookingNotInDatabase_meetingBookingNotFoundException() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
