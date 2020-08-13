@@ -89,6 +89,23 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void getMyBooking_bookingInDatabase_bookingReturnedSuccessfully() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        MvcResult result = mockMvc.perform(get("/api/bookings/me/{bookingId}", bookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final MeetingBooking meetingBooking = parseResponse(result, MeetingBooking.class);
+        assertNotNull(meetingBooking);
+        assertEquals(bookingId, meetingBooking.getId());
+    }
+
+    @Test
     void bookingMeeting_failure_meetingBookingAlreadyExistsException() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
