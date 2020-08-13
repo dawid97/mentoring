@@ -11,11 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.javasolution.app.mentoring.security.SecurityConstants.EXPIRATION_TIME;
+import static com.javasolution.app.mentoring.security.SecurityConstants.SECRET_KEY;
+
 
 @Service
 public class JwtUtil {
-
-    private final String SECRET_KEY = "secret";
 
     private Claims extractAllClaims(final String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
@@ -36,7 +37,7 @@ public class JwtUtil {
 
     private String createToken(final Map<String, Object> claims, final String subject) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
