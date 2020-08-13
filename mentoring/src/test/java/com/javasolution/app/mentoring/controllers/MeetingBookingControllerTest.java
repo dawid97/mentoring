@@ -89,6 +89,23 @@ class MeetingBookingControllerTest {
     }
 
     @Test
+    void getMyBooking_wrongBookingIdType_invalidCastException() throws Exception {
+
+        assertEquals(1, meetingBookingRepository.count());
+        final String wrongBookingId = "as";
+        final String jwt = login(student.getEmail(), student.getPassword());
+
+        mockMvc.perform(get("/api/bookings/me/{bookingId}", wrongBookingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidCastException))
+                .andExpect(result -> assertEquals("Meeting booking id have to be long type"
+                        , Objects.requireNonNull(result.getResolvedException()).getMessage()));
+
+    }
+
+    @Test
     void getMyBooking_bookingInDatabase_bookingReturnedSuccessfully() throws Exception {
 
         assertEquals(1, meetingBookingRepository.count());
