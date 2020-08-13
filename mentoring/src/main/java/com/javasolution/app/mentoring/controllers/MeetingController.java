@@ -5,6 +5,9 @@ import com.javasolution.app.mentoring.responses.DeleteMeetingResponse;
 import com.javasolution.app.mentoring.services.MapValidationErrorService;
 import com.javasolution.app.mentoring.services.MeetingService;
 import com.javasolution.app.mentoring.validators.MeetingValidator;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,8 @@ public class MeetingController {
     private final MeetingValidator meetingValidator;
     private final MapValidationErrorService mapValidationErrorService;
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Add Meeting Web Service Endpoint")
     @PostMapping
     public ResponseEntity<?> addMeeting(@RequestBody final Meeting meeting, final BindingResult result) {
 
@@ -36,6 +41,8 @@ public class MeetingController {
         return new ResponseEntity<>(meetings, HttpStatus.CREATED);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Delete Meeting Web Service Endpoint")
     @DeleteMapping("/{meetingId}")
     public ResponseEntity<?> deleteMeeting(@PathVariable final String meetingId) {
 
@@ -45,6 +52,8 @@ public class MeetingController {
                 HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Update Meeting Web Service Endpoint")
     @PutMapping("/{meetingId}")
     public ResponseEntity<?> updateMeeting(@PathVariable final String meetingId, @RequestBody final Meeting meeting, final BindingResult result) {
 
@@ -58,6 +67,8 @@ public class MeetingController {
         return new ResponseEntity<>(updatedMeeting, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get All Meetings Web Service Endpoint")
     @GetMapping
     public ResponseEntity<?> getAllMeetings() {
 
@@ -66,6 +77,9 @@ public class MeetingController {
         return new ResponseEntity<>(meetings, HttpStatus.OK);
     }
 
+
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get Meeting Web Service Endpoint")
     @GetMapping("/{meetingId}")
     public ResponseEntity<?> getMeeting(@PathVariable final String meetingId) {
 

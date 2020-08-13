@@ -11,6 +11,9 @@ import com.javasolution.app.mentoring.services.ConfirmationTokenService;
 import com.javasolution.app.mentoring.services.MapValidationErrorService;
 import com.javasolution.app.mentoring.services.UserService;
 import com.javasolution.app.mentoring.validators.UserValidator;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,8 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Update Me Web Service Endpoint")
     @PutMapping("/me")
     public ResponseEntity<?> updateMe(@Valid @RequestBody final UpdateUserRequest updateUserRequest,
                                       final BindingResult result,
@@ -49,6 +54,8 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Delete User Web Service Endpoint")
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable final String userId) {
 
@@ -57,6 +64,8 @@ public class UserController {
         return new ResponseEntity<>(new DeleteAccountResponse("Account with ID: '" + userId + "' deleted successfully"), HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Delete Account Web Service Endpoint")
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteAccount(final Principal principal) {
 
@@ -65,6 +74,8 @@ public class UserController {
         return new ResponseEntity<>(new DeleteAccountResponse("Account deleted successfully"), HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get Me Web Service Endpoint")
     @GetMapping("/me")
     public ResponseEntity<?> getMe(final Principal principal) {
 
@@ -73,6 +84,7 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "The Sign-in User Web Service Endpoint")
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody final LoginRequest loginRequest, final BindingResult result) throws Exception {
 
@@ -92,6 +104,7 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(jwt));
     }
 
+    @ApiOperation(value = "The Confirm Mail Web Service Endpoint")
     @GetMapping("/sign-up/confirm")
     ResponseEntity<?> confirmMail(@RequestParam("token") final String token) {
 
@@ -100,6 +113,7 @@ public class UserController {
         return new ResponseEntity<>("verified email", HttpStatus.OK);
     }
 
+    @ApiOperation(value = "The Sign-up User Web Service Endpoint")
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody final User user, final BindingResult result) {
 
@@ -112,6 +126,8 @@ public class UserController {
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get All Users Web Service Endpoint")
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
 
@@ -120,6 +136,8 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get User Web Service Endpoint")
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUser(@PathVariable final String userId) {
 
