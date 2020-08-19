@@ -77,6 +77,16 @@ public class MeetingController {
         return new ResponseEntity<>(meetings, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
+    @ApiOperation(value = "The Get All Not Booked Meetings Web Service Endpoint")
+    @GetMapping("/notBooked")
+    public ResponseEntity<?> getAllNotBookedMeetings() {
+
+        final Iterable<Meeting> availableMeetings = meetingService.getAllNotBookedMeetings();
+
+        return new ResponseEntity<>(availableMeetings, HttpStatus.OK);
+    }
+
 
     @ApiImplicitParams({@ApiImplicitParam(name = "authorization", value = "Bearer + Json Web Token", paramType = "header")})
     @ApiOperation(value = "The Get Meeting Web Service Endpoint")
