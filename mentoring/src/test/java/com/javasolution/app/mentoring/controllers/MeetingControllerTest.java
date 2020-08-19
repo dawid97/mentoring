@@ -415,6 +415,43 @@ class MeetingControllerTest {
                         , Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
+    @Test
+    void getAllNotBookedMeetings() throws Exception {
+
+        //create meeting
+        final Meeting meeting = new Meeting();
+        meeting.setMeetingDate(LocalDate.now());
+        meeting.setMeetingStartTime(LocalTime.of(20, 15, 0, 0));
+        meeting.setMeetingEndTime(LocalTime.of(20, 30, 0, 0));
+        meeting.setBooked(false);
+        meeting.setCreateAt(LocalDateTime.now());
+        final Optional<User> foundMentor = userRepository.findById(mentorId);
+        foundMentor.ifPresent(meeting::setMentor);
+        Meeting savedMeeting = meetingRepository.save(meeting);
+
+        //change status
+        savedMeeting.setBooked(true);
+        meetingRepository.save(savedMeeting);
+
+        assertEquals(2, meetingRepository.count());
+        final String jwt = login(mentor.getEmail(), mentor.getPassword());
+
+
+        final MvcResult result = mockMvc.perform(get("/api/meetings/notBooked")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwt))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final List<Meeting> notBookedMeetings = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+
+        assertEquals(1, notBookedMeetings.size());
+        assertEquals(false, notBookedMeetings.get(0).getBooked());
+    }
+
     private String login(String username, String password) throws Exception {
 
         final LoginRequest loginRequest = new LoginRequest(username, password);
