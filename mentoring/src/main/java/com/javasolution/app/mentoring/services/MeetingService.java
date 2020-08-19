@@ -158,4 +158,8 @@ public class MeetingService {
 
         return meeting;
     }
+
+    public Iterable<Meeting> getAllNotBookedMeetings() {
+        return meetingRepository.findAllByBooked(false);
+    }
 }
