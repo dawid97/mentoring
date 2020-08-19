@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MeetingRepository extends CrudRepository<Meeting, Long> {
+    Iterable<Meeting> findAllByBooked(boolean isBooked);
 }
